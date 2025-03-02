@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     // Send the Base64 image to the external API
 
     //switch to http://api.shniter.com:5000/search if you arent at Julian's house
-    const { data } = await axios.post("http://192.168.123.110:5000/search", { image });
+    const { data } = await axios.post("http://api.shniter.com:5000/search", { image });
 
     console.log("API response:", data);
     if (!data?.similar_images || !Array.isArray(data.similar_images)) {
