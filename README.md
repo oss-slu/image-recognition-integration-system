@@ -12,7 +12,7 @@ To address these challenges, IRIS was designed as an easy-to-use, scalable frame
 
 One of the initial proof-of-concept applications is a system for identifying proprietary surgical screws, demonstrating the framework’s capabilities in a real-world medical use case. While not intended for immediate production deployment, this prototype showcases how IRIS can be adapted to specific industry needs and highlights areas for further improvement.
 
----
+--
 
 ## Tech Stack
 
