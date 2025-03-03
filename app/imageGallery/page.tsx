@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ImageGrid from "../components/imageGrid";
+import Spinner from "../components/spinner";
 import axios from "axios";
 
 export default function ImageGallery() {
@@ -47,6 +48,9 @@ export default function ImageGallery() {
     const sendPhotoToAPI = async (base64Image: string) => {
         setIsUploading(true);
         try {
+            if(isUploading == true){
+                <Spinner/>
+            }
             const { data } = await axios.post(
                 "http://192.168.123.110:5000/search",
                  { image: base64Image },
@@ -84,7 +88,7 @@ export default function ImageGallery() {
             <main>
                 <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
                     {images.length > 0 ? <ImageGrid images={images} /> : <p>No images found.</p>}
-                    {isUploading && <p className="text-gray-500">Uploading image...</p>}
+                    {isUploading && <Spinner/>}
                 </div>
             </main>
         </div>
