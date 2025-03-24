@@ -3,7 +3,7 @@
 import { Camera, CameraResultType } from "@capacitor/camera";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 
 const CameraButton = () => {
     const router = useRouter();
@@ -14,7 +14,7 @@ const CameraButton = () => {
             setIsCapturing(true);
             const photo = await Camera.getPhoto({
                 quality: 100,
-                resultType: CameraResultType.Uri, // ✅ Capture as a URI
+                resultType: CameraResultType.Uri,
                 allowEditing: false,
             });
 
@@ -22,19 +22,19 @@ const CameraButton = () => {
                 throw new Error("Photo capture failed");
             }
 
-
             console.log("Photo captured:", photo.webPath);
             // Convert to Base64 before sending
             const base64Image = await convertToBase64(photo.webPath);
-
-
-            console.log("Base64 image:", base64Image);
-            // Store Base64 image in localStorage
-            await storeImageInIndexedDB(base64Image);
-            // Send to Next.js API
-
-            // Redirect to Image Gallery
-            router.push("/imageGallery");
+            
+            // Generate a random UUID for this image
+            const imageId = uuidv4();
+            console.log("Generated image ID:", imageId);
+            
+            // Store Base64 image in IndexedDB with UUID
+            await storeImageInIndexedDB(imageId, base64Image);
+            
+            // Redirect to Image Gallery with the UUID
+            router.push(`/imageGallery?imageId=${imageId}`);
         } catch (error) {
             console.error("Camera error:", error);
         } finally {
@@ -51,7 +51,7 @@ const CameraButton = () => {
                     reader.readAsDataURL(blob);
                     reader.onloadend = () => {
                         if (typeof reader.result === "string") {
-                            resolve(reader.result); // ✅ Base64 string
+                            resolve(reader.result); // Base64 string
                         } else {
                             reject("Failed to convert image to Base64");
                         }
@@ -60,7 +60,8 @@ const CameraButton = () => {
                 .catch(error => reject(error));
         });
     };
-    const storeImageInIndexedDB = (base64Image: string) => {
+    
+    const storeImageInIndexedDB = (imageId: string, base64Image: string) => {
         return new Promise<void>((resolve, reject) => {
             const request = indexedDB.open("ImageStorageDB", 1);
     
@@ -76,7 +77,8 @@ const CameraButton = () => {
                 const transaction = db.transaction("images", "readwrite");
                 const store = transaction.objectStore("images");
     
-                store.put({ id: "capturedImage", data: base64Image });
+                // Store with UUID as id
+                store.put({ id: imageId, data: base64Image, timestamp: new Date().toISOString() });
     
                 transaction.oncomplete = () => resolve();
                 transaction.onerror = (error) => reject(error);
@@ -85,8 +87,6 @@ const CameraButton = () => {
             request.onerror = (error) => reject(error);
         });
     };
-    
-   
 
     return (
         <button 
