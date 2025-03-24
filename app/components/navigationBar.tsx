@@ -9,7 +9,7 @@ const BottomNav = () => {
           <div className="w-6 h-6 bg-gray-500 rounded-full"></div>
           <span className="text-xs">Search</span>
         </button>
-        <button className="flex flex-col items-center text-gray-700">
+        <button className="flex flex-col items-center text-gray-700" >
           <div className="w-6 h-6 bg-gray-500 rounded-full"></div>
           <span className="text-xs">Profile</span>
         </button>

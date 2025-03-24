@@ -1,6 +1,7 @@
 import Image from "next/image";
 import CameraButton from "@/app/components/cameraButton";
-import NavigationBar from "@/app/components/navigationBar"
+import NavigationBar from "@/app/components/navigationBar";
+
 
 export default function Home() {
   return (

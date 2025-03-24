@@ -13,6 +13,7 @@ interface ImageGridProps {
 export default function ImageGrid({ images }: ImageGridProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4">
+
       {images.map((image, index) => (
         <div key={index} className="relative aspect-square overflow-hidden rounded-lg shadow-md">
           <Image
