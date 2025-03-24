@@ -4,6 +4,7 @@ import { Camera, CameraResultType } from "@capacitor/camera";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import axios from "axios";
+import config from "@/config/Setup.json";
 
 const CameraButton = () => {
     const router = useRouter();
@@ -90,7 +91,7 @@ const CameraButton = () => {
 
     return (
         <button 
-            className="px-4 py-2 bg-green-500 text-white rounded-lg shadow-md"
+            className={`px-4 py-2 ${config.cameraButtonColor} text-white rounded-lg shadow-md`}
             onClick={takePhoto}
             disabled={isCapturing}
         >
