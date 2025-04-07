@@ -1,3 +1,4 @@
 {
-    "cameraButtonColor": "bg-green-500"
+    "cameraButtonColor": "bg-green-500",
+    "imageApiUrl": "example url"
 }
