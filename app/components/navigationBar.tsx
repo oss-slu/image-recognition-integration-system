@@ -10,13 +10,6 @@ const BottomNav = () => {
         </div>
       </Link>
 
-      <Link href="/search">
-        <div className="flex flex-col items-center text-gray-700 cursor-pointer">
-          <div className="w-6 h-6 bg-gray-500 rounded-full"></div>
-          <span className="text-xs">Search</span>
-        </div>
-      </Link>
-
       <Link href="/profile">
         <div className="flex flex-col items-center text-gray-700 cursor-pointer">
           <div className="w-6 h-6 bg-gray-500 rounded-full"></div>

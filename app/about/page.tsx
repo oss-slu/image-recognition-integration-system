@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function About() {
   return (
-    <div className="p-8 max-w-2xl mx-auto bg-grey rounded-xl shadow-md space-y-10">
+    <div className="p-8 max-w-2xl mx-auto bg-grey text-white rounded-xl shadow-md space-y-10">
       <h1 className="text-2xl font-bold">About This App</h1>
       <p>
         This application was developed under the Open-Source-Software Centre
