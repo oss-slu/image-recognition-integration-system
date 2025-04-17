@@ -79,7 +79,7 @@ jobs:
       - name: Run semantic-release to create tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release --no-ci :contentReference[oaicite:3]{index=3}
+        run: npx semantic-release --no-ci 
 
       - name: Get latest tag
         id: get_tag
