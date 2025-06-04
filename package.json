@@ -15,15 +15,16 @@
   "dependencies": {
     "@capacitor/android": "^7.0.1",
     "@capacitor/camera": "^7.0.0",
-    "@capacitor/cli": "^7.0.1",
-    "@capacitor/core": "^7.0.1",
+    "@capacitor/cli": "^7.2.0",
+    "@capacitor/core": "^7.2.0",
     "@capacitor/ios": "^7.0.1",
     "@capacitor/status-bar": "^7.0.1",
     "@xenova/transformers": "^2.17.2",
     "axios": "^1.8.1",
     "formidable": "^3.5.2",
     "lucide-react": "^0.487.0",
-    "next": "^14.2.23",
+    "mongoose": "^8.15.1",
+    "next": "^15.3.3",
     "react": "^18",
     "react-dom": "^18",
     "uuid": "^11.1.0"
@@ -64,5 +65,8 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5.7.3",
     "whatwg-fetch": "^3.6.20"
+  },
+  "dependencies": {
+  "mongoose": "^7.0.0"
   }
 }
