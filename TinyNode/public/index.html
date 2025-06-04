@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Tiny Things by Rerum</title>
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <script type="module" src="scripts/main.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1 data-lang-key="appName"></h1>
+        <p data-lang-key="appDesc">
+        </p>
+    </header>
+
+    <div class="button-panel">
+        <button data-lang-key="createBtn" role="button" onclick="UI.showForm('create',this)"></button>
+        <div class="api-legend">
+            <header>post</header>
+            <span class="payload">JSON Object</span>
+            <span class="returns success">201: Success</span>
+            <span class="returns error">400: Malformed JSON</span>
+            <span class="returns error">403: No Valid Token</span>
+            <span class="returns error">500: Server Error</span>
+        </div>
+        <button data-lang-key="updateBtn" role="button" onclick="UI.showForm('rerumUpdate',this)"></button>
+        <div class="api-legend">
+            <header>put, patch</header>
+            <span class="payload">JSON Object</span>
+            <span class="returns success">200: Success</span>
+            <span class="returns error">400: Malformed JSON</span>
+            <span class="returns error">403: Object Deleted</span>
+            <span class="returns error">500: Server Error</span>
+        </div>
+        <button data-lang-key="overwriteBtn" role="button" onclick="UI.showForm('overwrite',this)"></button>
+        <div class="api-legend">
+            <header>put</header>
+            <span class="payload">JSON Object</span>
+            <span class="returns success">200: Success</span>
+            <span class="returns error">400: Malformed JSON</span>
+            <span class="returns error">403: Object Deleted or Released</span>
+            <span class="returns error">403: No Valid Token</span>
+            <span class="returns error">500: Server Error</span>
+        </div>
+        <button data-lang-key="deleteBtn" role="button" onclick="UI.showForm('deleteObj',this)"></button>
+        <div class="api-legend">
+            <header>delete</header>
+            <span class="payload">no payload</span>
+            <span class="returns success">204: Success</span>
+            <span class="returns error">401: Not Owner</span>
+            <span class="returns error">403: Object Deleted or Released</span>
+            <span class="returns error">403: No Valid Token</span>
+            <span class="returns error">500: Server Error</span>
+        </div>
+        <button data-lang-key="queryBtn" role="button" onclick="UI.showForm('query',this)"></button>
+        <div class="api-legend">
+            <header>post</header>
+            <span class="payload">JSON Object</span>
+            <span class="returns success">200: [results]</span>
+            <span class="returns error">500: Server Error</span>
+        </div>
+<!--         <button data-lang-key="importBtn" role="button" onclick="UI.showForm('remoteUpdate',this)"></button>
+        <div class="api-legend">
+            <header>put</header>
+            <span class="payload">JSON Object</span>
+            <span class="returns success">200: Success</span>
+            <span class="returns error">403: No Valid Token</span>
+            <span class="returns error">500: Server Error</span>
+        </div> -->
+    </div>
+
+    <form id="query" action="javascript:void(0);" onsubmit="Action.query(this)" data-hidden="true">
+        <h2 data-lang-key="queryTitle"></h2>
+        <button data-lang-key="loadExample" type="button" class="example"
+            onclick="queryKey.value='test';queryValue.value='query'"></button>
+        <p data-lang-key="queryDesc"></p>
+        <label for="importId" data-lang-key="queryHelpText1">
+        </label>
+        <input type="text" id="queryKey" />
+        <label for="importId" data-lang-key="queryHelpText2">
+        </label>
+        <input type="text" id="queryValue" />
+        <button type="submit" role="button" data-lang-key="queryBtn"> </button>
+    </form>
+<!--     <form id="remoteUpdate" action="javascript:void(0);" onsubmit="Action.import(this)" data-hidden="true">
+        <h2 data-lang-key="importTitle"></h2>
+        <button data-lang-key="loadExample" type="button" class="example"
+            onclick="queryValue.value='https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json'"></button>
+        <p data-lang-key="importDesc">
+        </p>
+        <label for="importId" data-lang-key="importHelpText">
+        </label>
+        <input type="url" id="importId" />
+        <button type="submit" role="button" data-lang-key="importBtn"> </button>
+    </form> -->
+    <form id="rerumUpdate" action="javascript:void(0);" onsubmit="Action.update(this)" data-hidden="true">
+        <h2 data-lang-key="updateTitle"></h2>
+        <p data-lang-key="updateDesc">
+        </p>
+        <label for="updateId" data-lang-key="updateHelpText1">
+        </label>
+        <input type="url" id="updateId" />
+        <label for="updateJSON" data-lang-key="updateHelpText2">
+        </label>
+        <textarea id="updateJSON"></textarea>
+        <button type="submit" role="button" data-lang-key="updateBtn"> </button>
+    </form>
+    <form id="overwrite" action="javascript:void(0);" onsubmit="Action.overwrite(this)" data-hidden="true">
+        <h2 data-lang-key="overwriteTitle"></h2>
+        <p data-lang-key="overwriteDesc">
+        </p>
+        <label for="overwriteId" data-lang-key="overwriteHelpText1">
+        </label>
+        <input type="url" id="overwriteId" />
+        <label for="overwriteJSON" data-lang-key="overwriteHelpText2">
+        </label>
+        <textarea id="overwriteJSON"></textarea>
+        <button type="submit" role="button" data-lang-key="overwriteBtn"> </button>
+    </form>
+    <form id="create" action="javascript:void(0);" onsubmit="Action.create(this)">
+        <h2 data-lang-key="createTitle"></h2>
+        <button data-lang-key="loadExample" type="button" class="example"
+            onclick="createJSON.value=JSON.stringify({test:'creating',numbers:42,booleans:true}, undefined, 4);"></button>
+        <p data-lang-key="createDesc"></p>
+        <label for="createJSON" data-lang-key="createHelpText">
+        </label>
+        <textarea id="createJSON"></textarea>
+        <button type="submit" role="button" data-lang-key="createBtn"> </button>
+    </form>
+    <form id="deleteObj" action="javascript:void(0);" onsubmit="Action.delete(this)" data-hidden="true">
+        <h2 data-lang-key="deleteTitle"></h2>
+        <p data-lang-key="deleteDesc">
+        </p>
+        <label for="deleteId" data-lang-key="deleteHelpText">
+        </label>
+        <input type="url" id="deleteId" />
+        <button type="submit" role="button" data-lang-key="deleteBtn"> </button>
+    </form>
+
+    <div id="flash-message">
+        This &lt;div> should be invisible until a message appears.  test.
+    </div>
+
+    <div id="obj-viewer">
+    </div>
+    <os-statement>
+        This site is open source.  <a target="_blank" href="https://github.com/CenterForDigitalHumanities/TinyNode">Improve this page</a>
+    </os-statement>
+</body>
+
+</html>

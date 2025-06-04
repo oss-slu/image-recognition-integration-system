@@ -1,0 +1,7 @@
+This is somewhat tricky.  Remember we are using ES6 now, so ignore documentation for other syntaxes.  
+We will need to do some manual mocking to make this available.
+See https://jestjs.io/docs/es6-class-mocks#manual-mock
+See https://jestjs.io/docs/es6-class-mocks#manual-mock-that-is-another-es6-class
+
+We have the advantage of knowing we are trying to mock a MongoDB.  There is a library for this that may be a shortcut.
+See https://github.com/shelfio/jest-mongodb

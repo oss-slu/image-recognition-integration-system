@@ -1,0 +1,81 @@
+name: TinyNode Dev Deploy on PR to main
+on:
+  pull_request:
+    branches: main
+jobs:
+  merge-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Merge with main
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          from_branch: main
+          target_branch: ${{ github.head_ref }}
+          github_token: ${{ secrets.BRY_PAT }}
+          message: Merge main into this branch to deploy to dev for testing.
+  test:
+    needs: merge-branch
+    strategy:
+      matrix:
+        machines:
+          - vlcdhp02
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Create .env from secrets
+        uses: SpicyPizza/create-envfile@v2
+        with:
+          envkey_RERUM_REGISTRATION_URL: https://devstore.rerum.io/v1
+          envkey_RERUM_API_ADDR: https://devstore.rerum.io/v1/api/
+          envkey_RERUM_ID_PATTERN: https://devstore.rerum.io/v1/id/
+          envkey_RERUM_ACCESS_TOKEN_URL: https://devstore.rerum.io/client/request-new-access-token
+      - name: Setup Node.js
+        uses: actions/setup-node@master
+        with:
+          node-version: "22"
+      - name: Cache node modules
+        uses: actions/cache@master
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{
+            hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - name: Install dependencies and run the test
+        run: |
+          npm install
+          npm run functionalTests
+  deploy:
+    if: github.event.pull_request.draft == false
+    needs:
+      - merge-branch
+      - test
+    strategy:
+      matrix:
+        node-version:
+          - 22
+        machines:
+          - vlcdhp02
+    runs-on: ${{ matrix.machines }}
+    steps:
+      - uses: actions/checkout@master
+      - name: Deploy the app on the server
+        run: |
+          if [[ ! -e /srv/node/logs/tinynode.txt ]]; then
+              mkdir -p /srv/node/logs
+              touch /srv/node/logs/tinynode.txt
+          fi
+          cd /srv/node/tiny-node/
+          pm2 stop tinyNode
+          git stash
+          git pull
+          git checkout ${{ github.head_ref }}
+          git pull
+          npm install
+          pm2 start -i max bin/tinyNode.js

@@ -1,0 +1,9 @@
+It would be extremely useful to mock Auth0 JWT stuff.
+We will need to do some manual mocking to make these functions return the expected responses.
+Remember we are using ES6 now, so ignore documentation for other syntaxes.  
+See https://jestjs.io/docs/es6-class-mocks#manual-mock
+See https://jestjs.io/docs/es6-class-mocks#manual-mock-that-is-another-es6-class
+
+Remember that responses are Auth0 Responses and would need to be shaped as such.
+See https://zhifei-dev.medium.com/express-typescript-properly-mocking-jwt-verify-in-unit-test-b2dfd2e33
+See https://www.npmjs.com/package/oauth2-mock-server

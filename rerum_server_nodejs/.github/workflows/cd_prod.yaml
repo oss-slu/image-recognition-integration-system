@@ -1,0 +1,58 @@
+name: RERUM Server v1 Production Deploy on push to main.
+on:
+  push:
+    branches: main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Create .env from secrets
+        run: echo "${{ secrets.PROD_FULL_ENV }}" > .env
+      - name: Setup Node.js
+        uses: actions/setup-node@master
+        with:
+          node-version: "22"
+
+      # Speed up subsequent runs with caching
+      - name: Cache node modules
+        uses: actions/cache@master
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{
+            hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - name: Install dependencies and run the test
+        run: |
+          npm install
+          npm run runtest
+  deploy:
+    needs: test
+    strategy:
+      matrix:
+        node-version:
+          - 22
+        machines:
+          - vlcdhprdp02
+    runs-on: ${{ matrix.machines }}
+    steps:
+      - uses: actions/checkout@master
+      - name: Deploy the app on the server
+        run: |
+          if [[ ! -e /srv/node/logs/rerumv1.txt ]]; then
+              mkdir -p /srv/node/logs
+              touch /srv/node/logs/rerumv1.txt
+          fi
+          cd /srv/node/v1-node/
+          pm2 stop rerum_v1
+          git stash
+          git checkout main
+          git stash
+          git pull
+          npm install
+          pm2 start -i max bin/rerum_v1.js

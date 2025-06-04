@@ -1,0 +1,46 @@
+name: TinyNode production deploy on push to main.
+on:
+  push:
+    branches: main
+jobs:
+  test:
+    strategy:
+      matrix:
+        machines:
+          - vlcdhprdp02
+    runs-on: ${{ matrix.machines }}
+    steps:
+      - uses: actions/checkout@master
+      - name: Test the app on the server
+        run: |
+          cd /srv/node/tiny-node/
+          git stash
+          git checkout main
+          git pull
+          npm install
+          npm run allTests
+  deploy:
+    needs:
+      - test
+    strategy:
+      matrix:
+        node-version:
+          - 22
+        machines:
+          - vlcdhprdp02
+    runs-on: ${{ matrix.machines }}
+    steps:
+      - uses: actions/checkout@master
+      - name: Deploy the app on the server
+        run: |
+          if [[ ! -e /srv/node/logs/tinynode.txt ]]; then
+              mkdir -p /srv/node/logs
+              touch /srv/node/logs/tinynode.txt
+          fi
+          cd /srv/node/tiny-node/
+          pm2 stop tinyNode
+          git stash
+          git checkout main
+          git pull
+          npm install
+          pm2 start -i max bin/tinyNode.js

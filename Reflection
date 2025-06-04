@@ -1,0 +1,36 @@
+Github link: https://github.com/slu-csci-5030/image-recognition-integration-system/tree/iris/Supraja050202
+
+## What did you observe about the process?
+
+Mob programming process encouraged teamwork and feedback. It was very helpful as a group of people 
+are working on the same problem for issues like Docker file errors and YAML indentation. Collaborative 
+effort made it easier to learn from others and solve problems faster.
+
+## What did you contribute?
+
+I helped in debugging the docker-compose file and fixed syntax errors in the Docker files for both RERUM and 
+Tiny Node. I have also resolved the issue with the Docker Desktop as it was not running properly on windows.
+I have ensured that the folder structure and paths were correct.
+
+## Did you have ideas that did not get included? If so, why?
+
+I have suggested .env file for configuration management, which would help code separation from environment 
+specific values. We decided to meet the requirement running without .env file to keep it simpler.
+
+##Where you familiar with any of the tools before we used them? If so, how could we have used them better? If not,
+what would have helped you use the tools more easily?
+
+No, I don’t have much familiarity with Docker but had basic knowledge of Docker. This session helped me in 
+understanding and debugging the issues.
+
+## How can we encourage communication within the group while doing mob programming?
+
+To keep everyone involved, we set a timer for each member so that everyone would get a chance to give their input.
+And also setting short-term goals for each session could help maintain focus and balance contributions.
+
+## Where there things that worked well for the group? How can we amplify those things?
+
+Real-time debugging and feedback were very effective. We stayed productive and learned by solving problems together 
+and it also helped with knowledge sharing.
+
+

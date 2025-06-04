@@ -1,0 +1,56 @@
+/**
+    * Use this to perform end to end interactions with Auth0 TPEN3 Application.
+    * The app passes NodeJS Express Request and Response objects which have Bearer Tokens in their headers.
+    * Those Bearer tokens are pulled from the Request 'Authorization' header.
+    * The app should be able to verify the token is legitimate and gleam a TPEN3 user from it
+    *
+    * Note that in this test we are performing real Auth0 communication.
+    * There are areas of the app that could benefit from having this communication exist as a mock.
+    * If that is what you need, get out of here and go see /auth/__mocks__
+*/
+
+import auth from "../../auth/index.js"
+import httpMocks from "node-mocks-http"
+
+const goodToken = "TODO -- MAKE ME PROGRAMMATICALLY"
+
+// A mocked HTTP POST 'create' request with an Authorization header.  The token should be a valid one.
+const mockRequest_with_token = httpMocks.createRequest({
+    method: 'POST',
+    url: '/create',
+    body: {
+        hello: 'world'
+    },
+    headers: {
+        "Authorization" : `Bearer ${goodToken}`
+    }
+})
+
+// A mocked HTTP POST 'create' request without an Authorization header (no Bearer token)
+const mockRequest_without_token = httpMocks.createRequest({
+    method: 'POST',
+    url: '/create',
+    body: {
+        hello: 'world'
+    }
+})
+
+// A mocked HTTP response stub
+const mockResponse = httpMocks.createResponse()
+
+// A mocked express next() call
+const nextFunction = jest.fn()
+
+// REDO
+describe('Auth0 Interactions',()=>{
+
+    it('reject empty request without headers (INCOMPLETE)',async ()=>{
+        const resp = await auth.checkJwt[0](mockRequest_without_token,mockResponse,nextFunction)
+        expect(resp).toBe("token error")
+    })
+
+    it('with "authorization" header (INCOMPLETE)', async () => {
+        const resp = await auth.checkJwt[0](mockRequest_with_token,mockResponse,nextFunction)
+        expect(resp).toBe("valid token")
+    })
+})
