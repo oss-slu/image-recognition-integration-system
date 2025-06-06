@@ -1,4 +1,4 @@
-package com.iris.ap;
+package com.iris.app;
 
 import com.getcapacitor.BridgeActivity;
 

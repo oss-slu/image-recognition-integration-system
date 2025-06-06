@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">image-recognition-integration-system</string>
     <string name="title_activity_main">image-recognition-integration-system</string>
-    <string name="package_name">com.iris.ap</string>
-    <string name="custom_url_scheme">com.iris.ap</string>
+    <string name="package_name">com.iris.app</string>
+    <string name="custom_url_scheme">com.iris.app</string>
 </resources>

@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo:4.4
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  tinynode:
+    build:
+      context: C:\Users\Chandana R\PSDproject\image-recognition-integration-system\TinyNode
+      dockerfile: Dockerfile
+    container_name: tinynode
+    ports:
+      - "3030:3030"
+    depends_on:
+      - mongodb
+
+  rerum:
+    build:
+      context: C:\Users\Chandana R\PSDproject\image-recognition-integration-system\rerum_server_nodejs
+      dockerfile: Dockerfile
+    container_name: rerum
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+      - tinynode
+
+volumes:
+  mongo_data:
