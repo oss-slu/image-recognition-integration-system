@@ -1,17 +1,9 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.iris.app',
-  appName: 'image-recognition-integration-system',
-  webDir: 'out',
-
-  plugins: {
-    StatusBar: {
-      backgroundColor: '#111827', // This should match your app's background color
-
-    },
-
-  }
+  appId: 'com.example.app',
+  appName: 'obsa',
+  webDir: 'public'
 };
 
 export default config;

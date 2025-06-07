@@ -8,16 +8,6 @@ xcuserdata
 # Cordova plugins for Capacitor
 capacitor-cordova-ios-plugins
 
-#ios files
-
-
-
-# Android files
-
-
-capacitor setup json
-capacitor.config.json
-
 # Generated Config files
 App/App/capacitor.config.json
 App/App/config.xml
