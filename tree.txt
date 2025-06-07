@@ -1,0 +1,523 @@
+.
+├── .DS_Store
+├── .eslintrc.json
+├── .github
+│   ├── ISSUE_TEMPLATE
+│   │   ├── bdd_feature_request.md
+│   │   └── userstory_issue.md
+│   └── workflows
+│       └── release.yml
+├── .gitignore
+├── .next
+│   ├── app-build-manifest 2.json
+│   ├── app-build-manifest 3.json
+│   ├── app-build-manifest.json
+│   ├── build-manifest 2.json
+│   ├── build-manifest 3.json
+│   ├── build-manifest.json
+│   ├── cache
+│   │   ├── .rscinfo
+│   │   ├── .tsbuildinfo
+│   │   ├── eslint
+│   │   │   └── .cache_x274m2
+│   │   ├── swc
+│   │   │   └── plugins
+│   │   │       ├── v7_macos_aarch64_0.106.15
+│   │   │       └── v7_macos_aarch64_9.0.0
+│   │   └── webpack
+│   │       ├── client-development
+│   │       │   ├── 0.pack.gz
+│   │       │   ├── 1.pack.gz
+│   │       │   ├── 10.pack.gz
+│   │       │   ├── 11.pack.gz
+│   │       │   ├── 12.pack.gz
+│   │       │   ├── 13.pack.gz
+│   │       │   ├── 14.pack.gz
+│   │       │   ├── 15.pack.gz
+│   │       │   ├── 16.pack.gz
+│   │       │   ├── 2 2.gz_
+│   │       │   ├── 2 2.pack.gz
+│   │       │   ├── 2.pack.gz
+│   │       │   ├── 3 2.pack.gz
+│   │       │   ├── 3.pack.gz
+│   │       │   ├── 4.pack.gz
+│   │       │   ├── 5 2.pack.gz
+│   │       │   ├── 5 3.pack.gz
+│   │       │   ├── 5.pack.gz
+│   │       │   ├── 6 2.pack.gz
+│   │       │   ├── 6.pack.gz
+│   │       │   ├── 7 2.pack.gz
+│   │       │   ├── 7.pack.gz
+│   │       │   ├── 8 2.pack.gz
+│   │       │   ├── 8 3.pack.gz
+│   │       │   ├── 8.pack.gz
+│   │       │   ├── 9 2.pack.gz
+│   │       │   ├── 9 3.pack.gz
+│   │       │   ├── 9.pack.gz
+│   │       │   ├── index 2.pack.gz
+│   │       │   ├── index 3.pack.gz
+│   │       │   ├── index.pack.gz
+│   │       │   ├── index.pack.gz 2.old
+│   │       │   ├── index.pack.gz 2.pack.gz
+│   │       │   └── index.pack.gz.old
+│   │       ├── client-development-fallback
+│   │       │   ├── 0.pack.gz
+│   │       │   ├── 1.pack.gz
+│   │       │   ├── index.pack.gz
+│   │       │   └── index.pack.gz.old
+│   │       ├── client-production
+│   │       │   ├── 0.pack
+│   │       │   └── index.pack
+│   │       ├── edge-server-production
+│   │       │   ├── 0.pack
+│   │       │   └── index.pack
+│   │       ├── server-development
+│   │       │   ├── 0 2.pack.gz
+│   │       │   ├── 0.pack.gz
+│   │       │   ├── 1 2.pack.gz
+│   │       │   ├── 1.pack.gz
+│   │       │   ├── 10.pack.gz
+│   │       │   ├── 11.pack.gz
+│   │       │   ├── 12.pack.gz
+│   │       │   ├── 13.pack.gz
+│   │       │   ├── 14.pack.gz
+│   │       │   ├── 2 2.pack.gz
+│   │       │   ├── 2.pack.gz
+│   │       │   ├── 3 2.pack.gz
+│   │       │   ├── 3.pack.gz
+│   │       │   ├── 4 2.pack.gz
+│   │       │   ├── 4.pack.gz
+│   │       │   ├── 5.pack.gz
+│   │       │   ├── 6.pack.gz
+│   │       │   ├── 7 2.pack.gz
+│   │       │   ├── 7.pack.gz
+│   │       │   ├── 8.pack.gz
+│   │       │   ├── 9.pack.gz
+│   │       │   ├── index 2.pack.gz
+│   │       │   ├── index.pack.gz
+│   │       │   ├── index.pack.gz 2.pack.gz
+│   │       │   └── index.pack.gz.old
+│   │       └── server-production
+│   │           ├── 0.pack
+│   │           └── index.pack
+│   ├── fallback-build-manifest.json
+│   ├── package 2.json
+│   ├── package 3.json
+│   ├── package.json
+│   ├── react-loadable-manifest 2.json
+│   ├── react-loadable-manifest 3.json
+│   ├── react-loadable-manifest.json
+│   ├── server
+│   │   ├── app
+│   │   │   ├── favicon.ico
+│   │   │   │   └── route.js
+│   │   │   ├── page_client-reference-manifest.js
+│   │   │   ├── page.js
+│   │   │   └── previousImages
+│   │   │       ├── page_client-reference-manifest.js
+│   │   │       └── page.js
+│   │   ├── app-paths-manifest.json
+│   │   ├── interception-route-rewrite-manifest.js
+│   │   ├── middleware-build-manifest.js
+│   │   ├── middleware-manifest.json
+│   │   ├── middleware-react-loadable-manifest.js
+│   │   ├── next-font-manifest.js
+│   │   ├── next-font-manifest.json
+│   │   ├── pages-manifest.json
+│   │   ├── server-reference-manifest.js
+│   │   ├── server-reference-manifest.json
+│   │   ├── vendor-chunks
+│   │   │   ├── @capacitor.js
+│   │   │   ├── @swc.js
+│   │   │   ├── lucide-react.js
+│   │   │   ├── next.js
+│   │   │   └── uuid.js
+│   │   └── webpack-runtime.js
+│   ├── static
+│   │   ├── chunks
+│   │   │   ├── app
+│   │   │   │   ├── layout.js
+│   │   │   │   ├── page.js
+│   │   │   │   └── previousImages
+│   │   │   │       └── page.js
+│   │   │   ├── app-pages-internals.js
+│   │   │   ├── main-app.js
+│   │   │   ├── polyfills.js
+│   │   │   └── webpack.js
+│   │   ├── css
+│   │   │   └── app
+│   │   │       └── layout.css
+│   │   ├── development
+│   │   │   ├── _buildManifest.js
+│   │   │   └── _ssgManifest.js
+│   │   ├── media
+│   │   │   ├── 4473ecc91f70f139-s.p.woff
+│   │   │   └── 463dafcda517f24f-s.p.woff
+│   │   └── webpack
+│   │       ├── 1aadf957cbb1a9b2.webpack.hot-update.json
+│   │       ├── 633457081244afec._.hot-update.json
+│   │       ├── app
+│   │       │   └── layout.1aadf957cbb1a9b2.hot-update.js
+│   │       ├── ded960f6cfe56d96.webpack.hot-update.json
+│   │       ├── webpack.1aadf957cbb1a9b2.hot-update.js
+│   │       └── webpack.ded960f6cfe56d96.hot-update.js
+│   ├── trace
+│   ├── trace 2
+│   ├── trace 3
+│   └── types
+│       ├── app
+│       │   ├── layout.ts
+│       │   ├── page.ts
+│       │   └── previousImages
+│       │       └── page.ts
+│       ├── cache-life.d.ts
+│       └── package.json
+├── .releaserc.json
+├── android
+│   ├── .gitignore
+│   ├── .gradle
+│   │   ├── 8.11.1
+│   │   │   ├── checksums
+│   │   │   │   └── checksums.lock
+│   │   │   ├── expanded
+│   │   │   ├── fileChanges
+│   │   │   │   └── last-build.bin
+│   │   │   ├── fileHashes
+│   │   │   │   └── fileHashes.lock
+│   │   │   ├── gc.properties
+│   │   │   └── vcsMetadata
+│   │   ├── buildOutputCleanup
+│   │   │   ├── buildOutputCleanup.lock
+│   │   │   └── cache.properties
+│   │   └── vcs-1
+│   │       └── gc.properties
+│   ├── .idea
+│   │   ├── .gitignore
+│   │   ├── codeStyles
+│   │   │   └── Project.xml
+│   │   ├── compiler.xml
+│   │   ├── deploymentTargetSelector.xml
+│   │   ├── migrations.xml
+│   │   ├── misc.xml
+│   │   └── runConfigurations.xml
+│   ├── app
+│   │   ├── .gitignore
+│   │   ├── build.gradle
+│   │   ├── capacitor.build.gradle
+│   │   ├── proguard-rules.pro
+│   │   └── src
+│   │       ├── androidTest
+│   │       │   └── java
+│   │       │       └── com
+│   │       │           └── getcapacitor
+│   │       │               └── myapp
+│   │       │                   └── ExampleInstrumentedTest.java
+│   │       ├── main
+│   │       │   ├── AndroidManifest.xml
+│   │       │   ├── java
+│   │       │   │   └── com
+│   │       │   │       └── iris
+│   │       │   │           └── ap
+│   │       │   │               └── MainActivity.java
+│   │       │   └── res
+│   │       │       ├── drawable
+│   │       │       │   ├── ic_launcher_background.xml
+│   │       │       │   └── splash.png
+│   │       │       ├── drawable-land-hdpi
+│   │       │       │   └── splash.png
+│   │       │       ├── drawable-land-mdpi
+│   │       │       │   └── splash.png
+│   │       │       ├── drawable-land-xhdpi
+│   │       │       │   └── splash.png
+│   │       │       ├── drawable-land-xxhdpi
+│   │       │       │   └── splash.png
+│   │       │       ├── drawable-land-xxxhdpi
+│   │       │       │   └── splash.png
+│   │       │       ├── drawable-port-hdpi
+│   │       │       │   └── splash.png
+│   │       │       ├── drawable-port-mdpi
+│   │       │       │   └── splash.png
+│   │       │       ├── drawable-port-xhdpi
+│   │       │       │   └── splash.png
+│   │       │       ├── drawable-port-xxhdpi
+│   │       │       │   └── splash.png
+│   │       │       ├── drawable-port-xxxhdpi
+│   │       │       │   └── splash.png
+│   │       │       ├── drawable-v24
+│   │       │       │   └── ic_launcher_foreground.xml
+│   │       │       ├── layout
+│   │       │       │   └── activity_main.xml
+│   │       │       ├── mipmap-anydpi-v26
+│   │       │       │   ├── ic_launcher_round.xml
+│   │       │       │   └── ic_launcher.xml
+│   │       │       ├── mipmap-hdpi
+│   │       │       │   ├── ic_launcher_foreground.png
+│   │       │       │   ├── ic_launcher_round.png
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-mdpi
+│   │       │       │   ├── ic_launcher_foreground.png
+│   │       │       │   ├── ic_launcher_round.png
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-xhdpi
+│   │       │       │   ├── ic_launcher_foreground.png
+│   │       │       │   ├── ic_launcher_round.png
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-xxhdpi
+│   │       │       │   ├── ic_launcher_foreground.png
+│   │       │       │   ├── ic_launcher_round.png
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-xxxhdpi
+│   │       │       │   ├── ic_launcher_foreground.png
+│   │       │       │   ├── ic_launcher_round.png
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── values
+│   │       │       │   ├── ic_launcher_background.xml
+│   │       │       │   ├── strings.xml
+│   │       │       │   └── styles.xml
+│   │       │       └── xml
+│   │       │           └── file_paths.xml
+│   │       └── test
+│   │           └── java
+│   │               └── com
+│   │                   └── getcapacitor
+│   │                       └── myapp
+│   │                           └── ExampleUnitTest.java
+│   ├── build
+│   │   └── reports
+│   │       └── problems
+│   │           └── problems-report.html
+│   ├── build.gradle
+│   ├── capacitor.settings.gradle
+│   ├── gradle
+│   │   └── wrapper
+│   │       ├── gradle-wrapper.jar
+│   │       └── gradle-wrapper.properties
+│   ├── gradle.properties
+│   ├── gradlew
+│   ├── gradlew.bat
+│   ├── settings.gradle
+│   └── variables.gradle
+├── app
+│   ├── about
+│   │   └── page.tsx
+│   ├── components
+│   │   ├── cameraButton.tsx
+│   │   ├── imageDisplay.tsx
+│   │   ├── imageGrid.tsx
+│   │   ├── imageModal.tsx
+│   │   ├── navigationBar.tsx
+│   │   └── spinner.tsx
+│   ├── favicon.ico
+│   ├── fonts
+│   │   ├── GeistMonoVF.woff
+│   │   └── GeistVF.woff
+│   ├── globals.css
+│   ├── head.tsx
+│   ├── imageGallery
+│   │   ├── imageGallery.test.tsx
+│   │   └── page.tsx
+│   ├── layout.tsx
+│   ├── LayoutShell.tsx
+│   ├── lib
+│   │   └── modelClient.ts
+│   ├── loginscreen
+│   │   └── page.tsx
+│   ├── page.tsx
+│   ├── previousImages
+│   │   └── page.tsx
+│   ├── profile
+│   │   └── page.tsx
+│   ├── services
+│   │   └── rerumClient.ts
+│   ├── types
+│   └── utils
+│       └── indexedDbHelpers.ts
+├── capacitor.config.ts
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── Docker-compose.yml
+├── Dockerfile
+├── ios
+│   ├── .gitignore
+│   └── App
+│       ├── App
+│       │   ├── AppDelegate.swift
+│       │   ├── Assets.xcassets
+│       │   │   ├── AppIcon.appiconset
+│       │   │   │   ├── AppIcon-512@2x.png
+│       │   │   │   └── Contents.json
+│       │   │   ├── Contents.json
+│       │   │   └── Splash.imageset
+│       │   │       ├── Contents.json
+│       │   │       ├── splash-2732x2732-1.png
+│       │   │       ├── splash-2732x2732-2.png
+│       │   │       └── splash-2732x2732.png
+│       │   ├── Base.lproj
+│       │   │   ├── LaunchScreen.storyboard
+│       │   │   └── Main.storyboard
+│       │   └── Info.plist
+│       ├── App.xcodeproj
+│       │   └── project.pbxproj
+│       ├── App.xcworkspace
+│       │   ├── contents.xcworkspacedata
+│       │   └── xcshareddata
+│       │       └── IDEWorkspaceChecks.plist
+│       ├── Podfile
+│       └── Podfile.lock
+├── IRIS_arch.png
+├── jest.config.js
+├── jest.setup.js
+├── LICENSE.txt
+├── next-env.d.ts
+├── next.config.mjs
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── public
+│   └── setup.json
+├── README.md
+├── rerum_server_nodejs
+│   ├── __mocks__
+│   │   └── db-controller.txt
+│   ├── __tests__
+│   │   └── routes_mounted.test.js
+│   ├── .github
+│   │   └── workflows
+│   │       ├── cd_dev.yaml
+│   │       └── cd_prod.yaml
+│   ├── .gitignore
+│   ├── app.js
+│   ├── auth
+│   │   ├── __mocks__
+│   │   │   └── index.txt
+│   │   ├── __tests__
+│   │   │   └── token.test.txt
+│   │   └── index.js
+│   ├── bin
+│   │   └── rerum_v1.js
+│   ├── CODE_OF_CONDUCT.md
+│   ├── CODEOWNERS
+│   ├── CONTRIBUTING.md
+│   ├── database
+│   │   ├── __mocks__
+│   │   │   └── index.txt
+│   │   └── index.js
+│   ├── db-controller.js
+│   ├── Dockerfile
+│   ├── jest.config.js
+│   ├── LICENSE
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── public
+│   │   ├── API.html
+│   │   ├── context.json
+│   │   ├── favicon.ico
+│   │   ├── index.html
+│   │   ├── maintenance.html
+│   │   ├── stylesheets
+│   │   │   ├── api.css
+│   │   │   └── style.css
+│   │   ├── talend.jpg
+│   │   └── terms.txt
+│   ├── README.md
+│   ├── rest.js
+│   ├── routes
+│   │   ├── __tests__
+│   │   │   ├── bulkCreate.test.js
+│   │   │   ├── bulkUpdate.test.js
+│   │   │   ├── client.test.txt
+│   │   │   ├── compatability.test.txt
+│   │   │   ├── create.test.js
+│   │   │   ├── crud_routes_function.txt
+│   │   │   ├── delete.test.js
+│   │   │   ├── history.test.js
+│   │   │   ├── id.test.js
+│   │   │   ├── idNegotiation.test.js
+│   │   │   ├── overwrite.test.txt
+│   │   │   ├── patch.test.js
+│   │   │   ├── query.test.js
+│   │   │   ├── release.test.js
+│   │   │   ├── set.test.js
+│   │   │   ├── since.test.js
+│   │   │   ├── unset.test.js
+│   │   │   └── update.test.js
+│   │   ├── _gog_fragments_from_manuscript.js
+│   │   ├── _gog_glosses_from_manuscript.js
+│   │   ├── api-routes.js
+│   │   ├── bulkCreate.js
+│   │   ├── bulkUpdate.js
+│   │   ├── client.js
+│   │   ├── compatability.js
+│   │   ├── create.js
+│   │   ├── delete.js
+│   │   ├── history.js
+│   │   ├── id.js
+│   │   ├── index.js
+│   │   ├── overwrite.js
+│   │   ├── patchSet.js
+│   │   ├── patchUnset.js
+│   │   ├── patchUpdate.js
+│   │   ├── putUpdate.js
+│   │   ├── query.js
+│   │   ├── release.js
+│   │   ├── since.js
+│   │   └── static.js
+│   └── utils.js
+├── scripts
+│   └── update-native-versions.js
+├── tailwind.config.ts
+├── tests
+│   ├── index.test.tsx
+│   └── LoginScreen.test.tsx
+├── TinyNode
+│   ├── .dockerignore
+│   ├── .env
+│   ├── .github
+│   │   └── workflows
+│   │       ├── cd_dev.yaml
+│   │       └── cd_prod.yaml
+│   ├── .gitignore
+│   ├── app.js
+│   ├── bin
+│   │   └── tinyNode.js
+│   ├── CODEOWNERS
+│   ├── CONTRIBUTING.md
+│   ├── Dockerfile
+│   ├── jest.config.js
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── preprocessor.js
+│   ├── public
+│   │   ├── favicon.ico
+│   │   ├── index.html
+│   │   ├── scripts
+│   │   │   ├── api.js
+│   │   │   ├── config.js
+│   │   │   ├── main.js
+│   │   │   └── ui.js
+│   │   └── stylesheets
+│   │       └── style.css
+│   ├── README.md
+│   ├── routes
+│   │   ├── __tests__
+│   │   │   ├── create.test.js
+│   │   │   ├── delete.test.js
+│   │   │   ├── mount.test.js
+│   │   │   ├── overwrite.test.js
+│   │   │   ├── query.test.js
+│   │   │   └── update.test.js
+│   │   ├── create.js
+│   │   ├── delete.js
+│   │   ├── index.js
+│   │   ├── overwrite.js
+│   │   ├── query.js
+│   │   └── update.js
+│   ├── sample.env
+│   └── tokens.js
+├── tree.txt
+├── tsconfig.json
+├── types
+│   └── config.ts
+└── yarn.lock
+
+142 directories, 379 files
