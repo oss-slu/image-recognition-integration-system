@@ -2,20 +2,20 @@
 name: BDD Feature Request
 about: Describe a new feature or behavior using Given / When / Then format
 title: "[Feature]: "
-labels: ["feature", "bdd"]
+labels: enhancement
 assignees: ''
+
 ---
-
-
 
 Given [context or precondition],  
 When [event or action],
 Then [outcome or result]
 
 ## Acceptance Criteria
-
-- [ ] Condition 1
-- [ ] Condition 2
+- [ ] Feature implemented according to design/requirements  
+- [ ] All relevant tests pass  
+- [ ] Documentation updated (if applicable)  
+- [ ] Reviewed and approved in pull request 
 
 ## Additional Information
 
