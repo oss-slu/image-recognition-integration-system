@@ -1,4 +1,4 @@
-/* @vitest-environment jsdom */
+/** @jest-environment jsdom */
 // tests/CameraButton.test.tsx
 // Simple tests for CameraButton - keeping it readable with small comments
 
@@ -9,16 +9,19 @@ import userEvent from "@testing-library/user-event";
 // Adjusting import path based on the folder setup
 import CameraButton from "../app/components/cameraButton";
 
-// Mock next/navigation 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+// Shared spy so the component and the test see the same push()
+const push = jest.fn();
+jest.mock("next/navigation", () => ({
+    useRouter: () => ({ push }),
+}));
 
 // Mock uuid so we know the imageId used in push()
-vi.mock("uuid", () => ({ v4: () => "test-uuid-123" }));
+jest.mock("uuid", () => ({ v4: () => "test-uuid-123" }));
 
 // Mock Capacitor camera call
-vi.mock("@capacitor/camera", () => ({
+jest.mock("@capacitor/camera", () => ({
     Camera: {
-        getPhoto: vi.fn(async () => ({ webPath: "https://example.com/photo.jpg" })),
+        getPhoto: jest.fn(async () => ({ webPath: "https://example.com/photo.jpg" })),
     },
     CameraResultType: { Uri: "uri" },
 }));
@@ -29,7 +32,10 @@ class FileReaderMock {
     onloadend: null | (() => void) = null;
     readAsDataURL(_blob: Blob) {
         this.result = "data:image/png;base64,AAA";
-        if (this.onloadend) this.onloadend();
+        // Fire on the next tick so onloadened can be assigned first
+        setTimeout(() => {
+            if (this.onloadend) this.onloadend();
+        }, 0);
     }
 }
 Object.defineProperty(window, "FileReader", { value: FileReaderMock });
@@ -48,22 +54,50 @@ const fakeDb = {
 function makeIDBOpenSuccess() {
     const req: any = {};
     queueMicrotask(() => {
-        req.result = fakeDb;
-        if (req.onsuccess) req.onsuccess(new Event("success"));
-        queueMicrotask(() => {
-            if (fakeTx.oncomplete) fakeTx.oncomplete();
-        });
+        // Mock DB returned on success
+        const db = {
+            // Creating a tx that calls oncomplete AFTER the handler is set
+            transaction: (_store: string, _mode: string) => {
+                const tx: any = {};
+                tx.objectStore = () => ({ put: (_v: any) => void 0 });
+
+                // Fire after the current synchronous code completes
+                queueMicrotask(() => {
+                    if (typeof tx.oncomplete === "function") tx.oncomplete();
+                });
+
+                return tx;
+            },
+            objectStoreNames: { contains: () => true },
+            createObjectStore: (_: string, __: any) => void 0,
+        };
+
+        // If code listens for upgrade, calling it first
+        if (typeof req.onupgradeneeded === "function") {
+            req.result = db;
+            req.onupgradeneeded({} as any);
+        }
+
+        // Then signal success with the deb
+        req.result = db;
+        if (typeof req.onsuccess === "function") {
+            req.onsuccess(new Event("success"));
+        }
     });
     return req;
 }
 (window as any).indexedDB = {
-    open: vi.fn((_name: string, _ver: number) => makeIDBOpenSuccess()),
+    open: jest.fn((_name: string, _ver: number) => makeIDBOpenSuccess()),
 };
+
+// Silence console.error in this suit
+const muteErr = jest.spyOn(console, "error").mockImplementation(() => {});
+afterAll(() => muteErr.mockRestore());
 
 // Fetching is used twice in the component:
 // 1. ./setup.json -> returns color class
 // 2. photo.webPath -> returns a Blob
-const fetchMock = vi.fn(async (url: string) => {
+const fetchMock = jest.fn(async (url: string) => {
     if (url.includes("setup.json")) {
         return { ok: true, json: async () => ({ cameraButtonColor: "bg-green-600" }) } as any;
     }
@@ -72,7 +106,7 @@ const fetchMock = vi.fn(async (url: string) => {
 global.fetch = fetchMock as any;
 
 describe("CameraButton", () => {
-    afterEach(() => vi.clearAllMocks());
+    afterEach(() => jest.clearAllMocks());
     
     // Renders + Aria
     test("renders the button with accessible name", () => {
@@ -99,11 +133,8 @@ describe("CameraButton", () => {
         // During capture
         expect(screen.getByRole("button", { name: /capturing/i })).toBeDisabled();
 
-        const { useRouter } = await import("next/navigation");
-        const router = useRouter();
-
         await waitFor(() => {
-            expect(router.push).toHaveBeenCalledWith("/imageGallery?imageId=test-uuid-123");
+            expect(push).toHaveBeenCalledWith("/imageGallery?imageId=test-uuid-123");
         });
 
         // Back to normal
@@ -119,9 +150,7 @@ describe("CameraButton", () => {
         const first = screen.getByRole("button", { name: /use camera/i });
         await user.dblClick(first); // Double click fast
         // Still should only navigate once
-        const { useRouter } = await import("next/navigation");
-        const router = useRouter();
-        await waitFor(() => expect(router.push).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(push).toHaveBeenCalledTimes(1));
     });
 
     // Guard: If camera returns no webPath, it should not crash
