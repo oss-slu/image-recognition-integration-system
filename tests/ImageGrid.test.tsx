@@ -1,3 +1,4 @@
+// tests/ImageGrid.test.tsx
 //Covers rendering, props handling, and user interaction.
 //Ensures accessibility attributes are present.
 //Tests pass locally and in CI.
