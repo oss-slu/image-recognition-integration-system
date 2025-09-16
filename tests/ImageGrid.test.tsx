@@ -4,13 +4,13 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { axe, toHaveNoViolations } from 'jest-axe';
 
-import ImageGrid from '../components/ImageGrid';
-import { ImageGridProps } from '../components/ImageGrid.types';
-
 expect.extend(toHaveNoViolations);
+
+// Update the import path if the component is located elsewhere, for example:
+import ImageGrid from '../components/ImageGrid/ImageGrid';
+import { ImageGridProps } from '../components/ImageGrid/ImageGrid.types';
 
 const mockImages = [
     { src: '/image1.jpg', alt: 'Image 1', caption: 'Caption 1' },
