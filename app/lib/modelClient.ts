@@ -1,43 +1,57 @@
-//lib/ModelClient.ts
+// lib/ModelClient.ts
 "use client";
 
-import { pipeline } from "@xenova/transformers";
+import { pipeline, Pipeline } from "@xenova/transformers";
 
-// /** Singleton references to loaded pipelines */
- let imageEmbedder: any = null;
+/**
+ * Singleton reference to the loaded CLIP embedding pipeline
+ */
+let imageEmbedder: Pipeline | null = null;
 
-// /**
-//  * loading a CLIP embedding pipeline for image search (example).
-//  * this will make it easy to use other models
-//  */
- export async function loadEmbeddingPipeline() {
-   if (!imageEmbedder) {
-     // Using CLIP for image embeddings, just as an example
-     imageEmbedder = await pipeline(
-       "feature-extraction",
-       "Xenova/clip-vit-base-patch32"
-     );
-   }
-   return imageEmbedder;
- }
-
-// /**
-//  * Extract embeddings from an image. 
-//  * Returns a vector (array of floats) we can then compare with our dataset.
-//  */
- export async function getImageEmbeddings(image: Blob | string) : Promise<number[]> {
-   const embedder = await loadEmbeddingPipeline();
-   // The pipeline returns a nested array. We'll flatten or keep it nested as needed.
-   const result = await embedder(image);
-    let embedding: number[];
-
-  if (Array.isArray(result) && Array.isArray(result[0])) {
-    embedding = result[0] as number[];
-  } else if ("data" in result && Array.isArray((result as any).data)) {
-    embedding = (result as any).data;
-  } else {
-    // fallback: try to cast directly
-    embedding = result as number[];
+/**
+ * Load the CLIP embedding pipeline (Xenova Transformers)
+ */
+export async function loadEmbeddingPipeline(): Promise<Pipeline> {
+  if (!imageEmbedder) {
+    imageEmbedder = await pipeline(
+      "feature-extraction",
+      "Xenova/clip-vit-base-patch32"
+    );
   }
-    return Array.from(embedding);
- }
+  return imageEmbedder;
+}
+
+/**
+ * Extract embeddings from an image.
+ * @param image - A Blob, File, or URL string
+ * @returns A flattened array of floats (number[]) representing the image embedding
+ */
+export async function getImageEmbeddings(image: Blob | string): Promise<number[]> {
+  const embedder = await loadEmbeddingPipeline();
+  const result: unknown = await embedder(image);
+
+  let embedding: number[];
+
+  // Case 1: result is a nested array (number[][])
+  if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0])) {
+    embedding = result[0] as number[];
+
+  // Case 2: result is an object with .data array (tensor-like)
+  } else if (
+    typeof result === "object" &&
+    result !== null &&
+    "data" in result &&
+    Array.isArray((result as { data?: unknown }).data)
+  ) {
+    embedding = (result as { data: number[] }).data;
+
+  // Case 3: fallback: treat result directly as number[]
+  } else if (Array.isArray(result)) {
+    embedding = result as number[];
+
+  } else {
+    throw new Error("Unable to parse embeddings from pipeline output");
+  }
+
+  return Array.from(embedding);
+}
