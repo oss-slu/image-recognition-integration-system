@@ -3,18 +3,21 @@
 # - Uses cosine similarity by normalizing vectors and IndexFlatIP
 # - Endpoints: /health, /upsert, /delete, /search
 
-from fastapi import FastAPI
+import os
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Set
 import numpy as np
 import faiss
 
 app = FastAPI()
 
-DIM = 384 # Embedding dimension
+DIM = int(os.getenv("EMBEDDING_DIM", "384"))
+MAX_TOPK = int(os.getenv("MAX_TOPK", "100"))
 index = faiss.IndexFlatIP(DIM) # Inner product -> cosine if vectors are L2-normalized
 id_map: List[str] = [] # Keeps ids parallel to FAISS rows
 meta_map: Dict[str, Dict[str, Any]] = {} # id -> metadata
+tombstones: Set[str] = set()
 
 # Payloading schemas
 class UpsertItem(BaseModel):
@@ -46,7 +49,13 @@ def normalize_matrix(X: np.ndarray) -> np.ndarray:
 # Routes
 @app.get("/health")
 def health():
-    return {"ok": True, "count": int(index.ntotal), "dim": DIM}
+    return {
+        "ok": True, 
+        "count": int(index.ntotal), 
+        "dim": DIM, 
+        "max_topk": MAX_TOPK,
+        "tombstones": len(tombstones),
+    }
 
 @app.post("/upsert")
 def upsert(p: UpsertPayload):
@@ -57,6 +66,9 @@ def upsert(p: UpsertPayload):
     # Building matrix of vectors, normalize rows for cosine
     vecs = []
     for it in p.items:
+        if len(it.vector) != DIM:
+            raise HTTPException(status_code=422,
+                                detail=f"Vector for id '{it.id}' has dim={len(it.vector)} but EMBEDDING_DIM={DIM}")
         v = np.asarray(it.vector, dtype="float32")
         v = l2_normalize(v)
         vecs.append(v)
@@ -69,58 +81,74 @@ def upsert(p: UpsertPayload):
 
 @app.post("/delete")
 def delete(p: DeletePayload):
-    # IndexFlatIP doesn't support in-place deletes -> rebuilds a new index
-    global index, id_map
+    # Soft delete: mark IDs as tombstoned; rebuild happens in /compact
     if not p.ids:
         return {"deleted": 0}
-
-    # Getting all current vectors back
-    if index.ntotal == 0:
-        return {"deleted": 0}
+    before = len(tombstones)
+    tombstones.update(p.ids)
+    return {"deleted": len(tombstones) - before}
     
-    # Reconstructing all vectors from FAISS
+@app.post("/compact")
+def compact():
+    """
+    Physically rebuilding the index, dropping tombstoned ids
+    Run this occassionally
+    """
+    global index, id_map
+    if index.ntotal == 0 or not tombstones:
+        return {"compacted": 0, "remaining": int(index.ntotal)}
+
+    # Reconstructing all vectors
     X = index.reconstruct_n(0, index.ntotal) # (N, DIM) float32
-    keep = [i for i, _id in enumerate(id_map) if _id not in set(p.ids)]
-    if len(keep) == len(id_map):
-        return {"deleted": 0}
-    
-    X_keep = X[keep]
-    ids_keep = [id_map[i] for i in keep]
+    keep_idx = [i for i, _id in enumerate(id_map) if _id not in tombstones]
 
-    # Rebuilding fresh index
+    X_keep = X[keep_idx].astype("float32") if keep_idx else np.empty((0, DIM), dtype="float32")
+    ids_keep = [id_map[i] for i in keep_idx]
+
     new_index = faiss.IndexFlatIP(DIM)
-    if len(X_keep) > 0:
-        new_index.add(X_keep.astype("float32"))
+    if X_keep.shape[0] > 0:
+        new_index.add(X_keep)
 
-    # Swapping in
     index = new_index
     id_map = ids_keep
-
-    # Drop metadata for removed ids
-    for _id in p.ids:
+    removed = len(tombstones)
+    # Dropping metadata for removed ids
+    for _id in list(tombstones):
         meta_map.pop(_id, None)
-    
-    return {"deleted": 1}
+    tombstones.clear()
+    return {"compacted": removed, "remaining": int(index.ntotal)}
 
 @app.post("/search")
 def search(p: SearchPayload):
     if index.ntotal == 0:
         return []
     
+    if len(p.query) != DIM:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Query vector has dim={len(p.query)} but EMBEDDING_DIM={DIM}"
+        )
+
     q = np.asarray(p.query, dtype="float32")
     q = l2_normalize(q).reshape(1, -1)
 
-    k = int(max(1, min(p.top_k, int(index.ntotal))))
-    D, I = index.search(q, k) # D: scores, I: indices
+    # Asking FAISS for extra results to account for tombstoned items we will filter out
+    k_cap = min(MAX_TOPK, int(index.ntotal))
+    k_raw = int(max(1, min(max(p.top_k * 2, p.top_k + 10), k_cap)))
+    D, I = index.search(q, k_raw) # D: scores, I: indices
 
     out = []
     for score, idx in zip(D[0], I[0]):
         if idx < 0:
             continue
         _id = id_map[int(idx)]
+        if _id in tombstones:
+            continue
         out.append({
             "id": _id,
             "score": float(score),
             "metadata": meta_map.get(_id, {})
         })
+        if len(out) >= p.top_k:
+            break
     return out

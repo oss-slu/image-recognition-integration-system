@@ -19,7 +19,5 @@ export async function embedById(image: Blob | string): Promise<number[]> {
         throw new Error("embedding result is not array");
     }
 
-    // Normalizing (cosine similarity requires unit length)
-    const n = Math.sqrt(v.reduce((a, b) => a + b * b, 0)) || 1;
-    return v.map((x) => x / n);
+    return v;
 }
