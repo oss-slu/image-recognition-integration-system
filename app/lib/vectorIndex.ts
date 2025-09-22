@@ -23,7 +23,6 @@ function num(env: string | undefined, fallback: number): number {
 const FAISS_URL = (process.env.FAISS_URL || "http://127.0.0.1:8000").replace(/\/+$/, "");
 const EMBEDDING_DIM = num(process.env.EMBEDDING_DIM, 384);
 const MAX_TOPK = num(process.env.MAX_TOPK, 100);
-const FAISS_TIMEOUT_MS = num(process.env.FAISS_TIMEOUT_MS, 8000); // kept for future use if needed
 
 // Small helper to fail fast with readable message
 async function ok(res: Response, label: string) {
