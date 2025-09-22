@@ -64,8 +64,6 @@ describe('ImageGrid Component', () => {
         render(<ImageGrid {...defaultProps} />);
         const image = screen.getByAltText('Image 1');
         fireEvent.click(image);
-        // Assuming there's a click handler in the actual component
-        // Here we just check if the image is still in the document
         expect(image).toBeInTheDocument();
     });     
 });
