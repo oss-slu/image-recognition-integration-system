@@ -1,6 +1,6 @@
 {
     "cameraButtonColor": "bg-green-500",
-    "imageApiUrl": "http://192.168.123.110:5000/search",
+    "imageApiUrl": "http://10.178.26.242:5001/search",
 
     "appBackground": "bg-gray-900",
     "cardBackground": "bg-gray-800",
