@@ -5,7 +5,7 @@ const config: Config = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    './config/**/*.{js,ts,json}',
+    "./config/**/*.{js,ts,json}",
   ],
   safelist: [
     // Text colors
@@ -16,24 +16,24 @@ const config: Config = {
     "text-gray-300",
 
     // Backgrounds
-    "bg-gray-800",
-    "bg-gray-900",
-    "bg-blue-500",
-    "bg-red-500",
-    "bg-green-500", 
-    "bg-cyan-500",
-    "bg-indigo-600",
-    "hover:bg-indigo-700",
+    "bg-gray/800",
+    "bg-gray/900",
+    "bg-blue/500",
+    "bg-red/500",
+    "bg-green/500",
+    "bg-cyan/500",
+    "bg-indigo/600",
+    "hover:bg-indigo/700",
 
     // Borders
     "border-gray-700",
-    "border-blue-700"
+    "border-blue-700",
   ],
   theme: {
     extend: {
       colors: {
-        primary: '#003DA5',
-        secondary: '#C8C9C7',
+        primary: "#003DA5",
+        secondary: "#C8C9C7",
         background: "var(--background)",
         foreground: "var(--foreground)",
       },

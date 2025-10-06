@@ -1,11 +1,11 @@
 // jest.setup.js
-import '@testing-library/jest-dom';
-import 'whatwg-fetch'
+import "@testing-library/jest-dom";
+import "whatwg-fetch";
 
 // Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: jest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -39,7 +39,7 @@ class MockIntersectionObserver {
 global.IntersectionObserver = MockIntersectionObserver;
 
 // Mock Next.js router
-jest.mock('next/navigation', () => ({
+jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
@@ -47,7 +47,7 @@ jest.mock('next/navigation', () => ({
     back: jest.fn(),
     forward: jest.fn(),
   }),
-  usePathname: () => '',
+  usePathname: () => "",
   useSearchParams: () => new URLSearchParams(),
 }));
 
@@ -71,4 +71,3 @@ console.warn = (...args) => {
   }
   originalConsoleWarn(...args);
 };
-

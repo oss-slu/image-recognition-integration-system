@@ -120,14 +120,14 @@ The file `public/setup.json` contains runtime configuration for theming and API 
 
 ```json
 {
-  "cameraButtonColor": "bg-green-500",
+  "cameraButtonColor": "bg-green/500",
   "imageApiUrl": "http://<YOUR_API_HOST>:<PORT>/search",
-  "appBackground": "bg-gray-900",
-  "cardBackground": "bg-gray-800",
-  "textColor": "text-gray-200",
-  "headingColor": "text-blue-500",
-  "borderColor": "border-gray-700",
-  "buttonPrimary": "bg-blue-500 text-white hover:bg-blue-600",
+  "appBackground": "bg-gray/900",
+  "cardBackground": "bg-gray/800",
+  "textColor": "text-gray/200",
+  "headingColor": "text-blue/500",
+  "borderColor": "border-gray/700",
+  "buttonPrimary": "bg-blue/500 text-white hover:bg-blue/600",
   "buttonSecondary": "bg-slate-700 text-blue-200 hover:bg-slate-600"
 }
 ```
