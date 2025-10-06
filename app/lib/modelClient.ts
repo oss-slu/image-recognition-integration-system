@@ -22,12 +22,12 @@
 // }
 
 // /**
-//  * Extract embeddings from an image. 
+//  * Extract embeddings from an image.
 //  * Returns a vector (array of floats) we can then compare with our dataset.
 //  */
 // export async function getImageEmbeddings(image: Blob | string) {
 //   const embedder = await loadEmbeddingPipeline();
 //   // The pipeline returns a nested array. We'll flatten or keep it nested as needed.
 //   const result = await embedder(image);
-//   return result; 
+//   return result;
 // }

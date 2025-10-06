@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import axios from 'axios';
-import { AppConfig } from '@/types/config';
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import axios from "axios";
+import { AppConfig } from "@/types/config";
 
 interface SimilarImage {
   src: string;
@@ -12,7 +12,7 @@ interface SimilarImage {
 
 function ImageGalleryContent() {
   const searchParams = useSearchParams();
-  const imageId = searchParams.get('imageId');
+  const imageId = searchParams.get("imageId");
 
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [similarImages, setSimilarImages] = useState<SimilarImage[]>([]);
@@ -21,27 +21,21 @@ function ImageGalleryContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('./setup.json')
+    fetch("./setup.json")
       .then((response) => response.json())
       .then((data) => setConfig(data))
       .catch((error) => {
-        console.error('Error loading config:', error);
+        console.error("Error loading config:", error);
       });
   }, []);
 
-  useEffect(() => {
-    if (config && imageId) {
-      retrieveImageAndSearch(imageId, config);
-    }
-  }, [imageId, config]);
-
   const retrieveImageAndSearch = (id: string, config: AppConfig) => {
-    const request = indexedDB.open('ImageStorageDB', 1);
+    const request = indexedDB.open("ImageStorageDB", 1);
 
     request.onsuccess = () => {
       const db = request.result;
-      const transaction = db.transaction('images', 'readonly');
-      const store = transaction.objectStore('images');
+      const transaction = db.transaction("images", "readonly");
+      const store = transaction.objectStore("images");
       const getRequest = store.get(id);
 
       getRequest.onsuccess = async () => {
@@ -51,20 +45,26 @@ function ImageGalleryContent() {
           setLoading(false);
           await sendPhotoToAPI(base64Image, config);
         } else {
-          console.warn('No image found in IndexedDB with ID:', id);
+          console.warn("No image found in IndexedDB with ID:", id);
           setSimilarImages([]);
         }
       };
 
       getRequest.onerror = () => {
-        console.error('Error retrieving image from IndexedDB.');
+        console.error("Error retrieving image from IndexedDB.");
       };
     };
 
     request.onerror = () => {
-      console.error('Failed to access IndexedDB.');
+      console.error("Failed to access IndexedDB.");
     };
   };
+
+  useEffect(() => {
+    if (config && imageId) {
+      retrieveImageAndSearch(imageId, config);
+    }
+  }, [imageId, config, retrieveImageAndSearch]);
 
   const sendPhotoToAPI = async (base64Image: string, config: AppConfig) => {
     setIsSearching(true);
@@ -76,49 +76,62 @@ function ImageGalleryContent() {
         { image: base64Image },
         {
           headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
+            "Content-Type": "application/json",
+            Accept: "application/json",
           },
           withCredentials: false,
-        }
+        },
       );
 
       if (data?.similar_images && Array.isArray(data.similar_images)) {
-        const formatted = data.similar_images.map((url: string, index: number) => ({
-          src: url,
-          alt: `Similar Image ${index + 1}`,
-        }));
+        const formatted = data.similar_images.map(
+          (url: string, index: number) => ({
+            src: url,
+            alt: `Similar Image ${index + 1}`,
+          }),
+        );
         setSimilarImages(formatted);
       } else {
-        console.error('Unexpected API response format:', data);
+        console.error("Unexpected API response format:", data);
         setSimilarImages([]);
       }
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error("API request failed:", error);
       setSimilarImages([]);
     } finally {
       setIsSearching(false);
     }
   };
 
-  if (!config) return <div className="text-center text-white">Loading config...</div>;
+  if (!config)
+    return <div className="text-center text-white">Loading config...</div>;
 
   return (
     <div className={`min-h-screen ${config.appBackground} ${config.textColor}`}>
-      <header className={`border-b shadow ${config.borderColor}`}>
+      <header className={`border-b shadow-sm ${config.borderColor}`}>
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className={`text-3xl font-bold ${config.headingColor}`}>Image Gallery</h1>
+          <h1 className={`text-3xl font-bold ${config.headingColor}`}>
+            Image Gallery
+          </h1>
         </div>
       </header>
 
       <main>
         <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-          <h2 className={`mb-2 ml-4 text-xl font-semibold ${config.headingColor}`}>Queried image</h2>
+          <h2
+            className={`mb-2 ml-4 text-xl font-semibold ${config.headingColor}`}
+          >
+            Queried image
+          </h2>
           {loading ? (
             <p>Loading input image...</p>
           ) : imageData ? (
             <div className="mx-auto flex h-[200px] w-[300px] items-center justify-center overflow-hidden rounded-xl">
-              <img src={imageData} alt="Captured" className={`h-40 w-60 rounded-md object-cover ${config.cardBackground}`} />
+              <img
+                src={imageData}
+                alt="Captured"
+                className={`h-40 w-60 rounded-md object-cover ${config.cardBackground}`}
+              />
             </div>
           ) : (
             <p>No image found.</p>
@@ -132,7 +145,9 @@ function ImageGalleryContent() {
 
           {similarImages.length > 0 && (
             <div>
-              <h2 className={`mb-4 ml-4 text-xl font-semibold ${config.headingColor}`}>
+              <h2
+                className={`mb-4 ml-4 text-xl font-semibold ${config.headingColor}`}
+              >
                 Similar Images
               </h2>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
@@ -149,7 +164,9 @@ function ImageGalleryContent() {
           )}
 
           {!isSearching && similarImages.length === 0 && (
-            <div className="text-center text-gray-500">No similar images found.</div>
+            <div className="text-center text-gray-500">
+              No similar images found.
+            </div>
           )}
         </div>
       </main>
@@ -159,10 +176,10 @@ function ImageGalleryContent() {
 
 export default function ImageGallery() {
   return (
-    <Suspense fallback={<div className="text-center text-white">Loading...</div>}>
-
+    <Suspense
+      fallback={<div className="text-center text-white">Loading...</div>}
+    >
       <ImageGalleryContent />
-
     </Suspense>
   );
 }
