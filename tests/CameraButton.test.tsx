@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 // tests/CameraButton.test.tsx
-// Simple tests for CameraButton - keeping it readable with small comments
+// Simple test for CameraButton - keeping it readable with small comments
 
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";

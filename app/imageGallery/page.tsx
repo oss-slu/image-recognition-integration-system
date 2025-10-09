@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { AppConfig } from '@/types/config';
+import { getImageFromIndexedDB } from '../utils/indexedDbHelpers'; // Using helper
 
 interface SimilarImage {
   src: string;
@@ -20,6 +21,7 @@ function ImageGalleryContent() {
   const [imageData, setImageData] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Loading app config
   useEffect(() => {
     fetch('./setup.json')
       .then((response) => response.json())
@@ -29,43 +31,48 @@ function ImageGalleryContent() {
       });
   }, []);
 
+  // When we have config + imageId, retrieve from IndexedDB and kick off search
   useEffect(() => {
-    if (config && imageId) {
-      retrieveImageAndSearch(imageId, config);
+    if (!config) return;
+
+    // If there's no imageId, nothing to load — stopping the spinner and keeping UI clean
+    if (!imageId) {
+      setLoading(false); // Nothing to load, so stopping the spinner
+      setSimilarImages([]); // Keeping UI clean
+      return;
     }
+
+    retrieveImageAndSearch(imageId, config);
   }, [imageId, config]);
 
-  const retrieveImageAndSearch = (id: string, config: AppConfig) => {
-    const request = indexedDB.open('ImageStorageDB', 1);
+  // Getting one image by id using helper, then calling API
+  const retrieveImageAndSearch = async (id: string, config: AppConfig) => {
+    try {
+      // Reading from IndexedDB via the shared helper
+      const base64 = await getImageFromIndexedDB(id);
 
-    request.onsuccess = () => {
-      const db = request.result;
-      const transaction = db.transaction('images', 'readonly');
-      const store = transaction.objectStore('images');
-      const getRequest = store.get(id);
+      if (!base64) {
+        console.warn('No image found in IndexedDb with ID:', id);
+        setImageData(null);
+        setSimilarImages([]);
+        setLoading(false);
+        return;
+      }
 
-      getRequest.onsuccess = async () => {
-        if (getRequest.result) {
-          const base64Image = getRequest.result.data;
-          setImageData(base64Image);
-          setLoading(false);
-          await sendPhotoToAPI(base64Image, config);
-        } else {
-          console.warn('No image found in IndexedDB with ID:', id);
-          setSimilarImages([]);
-        }
-      };
+      // Setting the image and stopping the loading spinner
+      setImageData(base64);
+      setLoading(false);
 
-      getRequest.onerror = () => {
-        console.error('Error retrieving image from IndexedDB.');
-      };
-    };
-
-    request.onerror = () => {
-      console.error('Failed to access IndexedDB.');
-    };
+      await sendPhotoToAPI(base64, config);
+    } catch (e) {
+      console.error('Error retrieving image from indexedDB', e);
+      setImageData(null);
+      setSimilarImages([]);
+      setLoading(false);
+    }
   };
 
+  // Sending base64 to the external API and collecting similar images
   const sendPhotoToAPI = async (base64Image: string, config: AppConfig) => {
     setIsSearching(true);
     setSimilarImages([]);
