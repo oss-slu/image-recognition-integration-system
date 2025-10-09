@@ -7,37 +7,37 @@ export interface StoredImage {
   timestamp: string;
 }
 
-// Small helper so we don’t repeat indexedDB.open everywhere
+// Small helper so we don't repeat indexedDB.open everywhere
 function openImageDB(): Promise<IDBDatabase> {
 return new Promise((resolve, reject) => {
-  const request = indexedDB.open(“ImageStorageDB”, 1);
+  const request = indexedDB.open("ImageStorageDB", 1);
 
   // Creating store on first run if needed
   request.onupgradeneeded = () => {
     const db = request.result;
-    // If store doesn’t exist, creating it with “id” as the primary key
-    if (!db.objectStoreNames.contains(“images”)) {
-      db.createObjectStore(“images”, { keyPath: “id” });
+    // If store doesn't exist, creating it with "id" as the primary key
+    if (!db.objectStoreNames.contains("images")) {
+      db.createObjectStore("images", { keyPath: "id" });
     }
   };
 
   request.onsuccess = () => resolve(request.result);
-  request.onerror = () => reject(new Error(“IndexedDB access failed”));
+  request.onerror = () => reject(new Error("IndexedDB access failed"));
 });
 }
 
 function hasIndexedDB() {
-return typeof window !== “undefined” && “indexedDB” in window;
+return typeof window !== "undefined" && "indexedDB" in window;
 }
 
 // Reusable function to load all stored images from IndexedDB
 export function loadStoredImages(): Promise<StoredImage[]> {
 return new Promise(async (resolve, reject) => {
   try {
-    if (!hasIndexedDB()) return reject(new Error(“IndexedDB not available”));
+    if (!hasIndexedDB()) return reject(new Error("IndexedDB not available"));
     const db = await openImageDB();
-    const transaction = db.transaction(“images”, “readonly”);
-    const store = transaction.objectStore(“images”);
+    const transaction = db.transaction("images", "readonly");
+    const store = transaction.objectStore("images");
     const getAllRequest = store.getAll();
 
     getAllRequest.onsuccess = (event) => {
@@ -52,7 +52,7 @@ return new Promise(async (resolve, reject) => {
     };
 
     getAllRequest.onerror = () =>
-      reject(new Error(“Error retrieving images from IndexedDB”));
+      reject(new Error("Error retrieving images from IndexedDB"));
   } catch (err) {
     reject(err);
   }
@@ -63,10 +63,10 @@ return new Promise(async (resolve, reject) => {
 export function getImageFromIndexedDB(id: string): Promise<string | null> {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!hasIndexedDB()) return reject(new Error(“IndexedDB not available”));
+      if (!hasIndexedDB()) return reject(new Error("IndexedDB not available"));
       const db = await openImageDB();
-      const tx = db.transaction(“images”, “readonly”);
-      const store = tx.objectStore(“images”);
+      const tx = db.transaction("images", "readonly");
+      const store = tx.objectStore("images");
       const req = store.get(id);
 
       req.onsuccess = (event) => {
@@ -79,15 +79,15 @@ export function getImageFromIndexedDB(id: string): Promise<string | null> {
         }
 
         // If devs stored raw base64 (no data: prefix), normalize to data URL
-        const data = record.data || “”;
-        const dataUrl = data.startsWith(“data:“)
+        const data = record.data || "";
+        const dataUrl = data.startsWith("data:")
           ? data
           : `data:image/png;base64,${data}`;
 
         resolve(dataUrl);
       };
 
-      req.onerror = () => reject(new Error(“Failed to read image from IndexedDB”));
+      req.onerror = () => reject(new Error("Failed to read image from IndexedDB"));
     } catch (err) {
       reject(err);
     }
@@ -98,10 +98,10 @@ export function getImageFromIndexedDB(id: string): Promise<string | null> {
 export function deleteImageFromIndexedDB(id: string): Promise<void> {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!hasIndexedDB()) return reject(new Error(“IndexedDB not available”));
+      if (!hasIndexedDB()) return reject(new Error("IndexedDB not available"));
       const db = await openImageDB();
-      const transaction = db.transaction(“images”, “readwrite”);
-      const store = transaction.objectStore(“images”);
+      const transaction = db.transaction("images", "readwrite");
+      const store = transaction.objectStore("images");
       store.delete(id);
 
       transaction.oncomplete = () => resolve();
@@ -116,10 +116,10 @@ export function deleteImageFromIndexedDB(id: string): Promise<void> {
 export function clearAllImagesFromIndexedDB(): Promise<void> {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!hasIndexedDB()) return reject(new Error(“IndexedDB not available”));
+      if (!hasIndexedDB()) return reject(new Error("IndexedDB not available"));
       const db = await openImageDB();
-      const transaction = db.transaction(“images”, “readwrite”);
-      const store = transaction.objectStore(“images”);
+      const transaction = db.transaction("images", "readwrite");
+      const store = transaction.objectStore("images");
       const clearRequest = store.clear();
 
       clearRequest.onsuccess = () => resolve();
@@ -129,3 +129,5 @@ export function clearAllImagesFromIndexedDB(): Promise<void> {
     }
   });
 }
+
+
