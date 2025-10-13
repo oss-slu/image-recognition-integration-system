@@ -7,10 +7,10 @@ interface ImageItem {
 }
 
 interface ImageGridProps {
-    images: ImageItem[]
-    captionBgClass?: string
-    captionTextClass?: string
-  }
+  images: ImageItem[]
+  captionBgClass?: string
+  captionTextClass?: string
+}
 
 export default function ImageGrid({ images, captionBgClass = "bg-black bg-opacity-50", captionTextClass = "text-white" }: ImageGridProps) {
   return (
@@ -34,14 +34,4 @@ export default function ImageGrid({ images, captionBgClass = "bg-black bg-opacit
       ))}
     </div>
   )
-}
-import Image from "next/image"
-
-interface ImageItem {
-  src: string
-
-  alt: string
-
-  caption?: string
-
 }
