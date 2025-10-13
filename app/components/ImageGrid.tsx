@@ -35,6 +35,13 @@ export default function ImageGrid({ images, captionBgClass = "bg-black bg-opacit
     </div>
   )
 }
+import Image from "next/image"
 
+interface ImageItem {
+  src: string
 
+  alt: string
 
+  caption?: string
+
+}
