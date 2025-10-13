@@ -4,13 +4,13 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { axe, toHaveNoViolations } from 'jest-axe';
 
-expect.extend(toHaveNoViolations);
+import ImageGrid from '../components/ImageGrid';
+import { ImageGridProps } from '../components/ImageGrid.types';
 
-// Update the import path if the component is located elsewhere, for example:
-import ImageGrid from '../components/ImageGrid/ImageGrid';
-import { ImageGridProps } from '../components/ImageGrid/ImageGrid.types';
+expect.extend(toHaveNoViolations);
 
 const mockImages = [
     { src: '/image1.jpg', alt: 'Image 1', caption: 'Caption 1' },
@@ -64,8 +64,7 @@ describe('ImageGrid Component', () => {
         render(<ImageGrid {...defaultProps} />);
         const image = screen.getByAltText('Image 1');
         fireEvent.click(image);
-        // Assuming there's a click handler in the actual component
-        // Here we just check if the image is still in the document
         expect(image).toBeInTheDocument();
     });     
 });
+
