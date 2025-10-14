@@ -118,7 +118,13 @@ function ImageGalleryContent() {
             <p>Loading input image...</p>
           ) : imageData ? (
             <div className="mx-auto flex h-[200px] w-[300px] items-center justify-center overflow-hidden rounded-xl">
-              <img src={imageData} alt="Captured" className={`h-40 w-60 rounded-md object-cover ${config.cardBackground}`} />
+              {/* optimized image already in Base64 WebP */}
+              <img 
+                src={imageData} 
+                alt="Captured"
+                loading="lazy"
+                className={`h-40 w-60 rounded-md object-cover ${config.cardBackground}`} 
+              />
             </div>
           ) : (
             <p>No image found.</p>
@@ -141,6 +147,7 @@ function ImageGalleryContent() {
                     key={image.src}
                     src={image.src}
                     alt={image.alt}
+                    loading="lazy"
                     className={`h-40 w-full rounded-md object-cover ${config.cardBackground}`}
                   />
                 ))}
