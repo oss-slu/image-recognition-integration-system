@@ -31,13 +31,6 @@ function ImageGalleryContent() {
       });
   }, []);
 
-  useEffect(() => {
-    if (config && imageId) {
-      retrieveImageAndSearch(imageId, config);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imageId, config]);
-
   const retrieveImageAndSearch = (id: string, config: AppConfig) => {
     const request = indexedDB.open('ImageStorageDB', 1);
 
@@ -103,6 +96,14 @@ function ImageGalleryContent() {
       setIsSearching(false);
     }
   };
+
+  // When config and imageId are ready, fetching image and running similarity search
+  useEffect(() => {
+    if (config && imageId) {
+      retrieveImageAndSearch(imageId, config);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageId, config]);
 
   if (!config) return <div className="text-center text-white">Loading config...</div>;
 
