@@ -33,31 +33,20 @@ function ImageGalleryContent() {
       });
   }, []);
 
-  const retrieveImageAndSearch = (id: string, config: AppConfig) => {
-    const request = indexedDB.open('ImageStorageDB', 1);
+  // Retrieving image and trigger seard
+  const retrieveImageAndSearch = async (id: string, config: AppConfig) => {
+    try {
+      const base64 = await getImageFromIndexedDB(id);
+      if (!base64) {
+        console.warn('No image found in IndexedDb with Id:', id);
+        setImageData(null);
+        setSimilarImages([]);
+        setLoading(false);
+        return;
+      }
 
-    request.onsuccess = () => {
-      const db = request.result;
-      const transaction = db.transaction('images', 'readonly');
-      const store = transaction.objectStore('images');
-      const getRequest = store.get(id);
-
-      getRequest.onsuccess = async () => {
-        if (getRequest.result) {
-          const base64Image = getRequest.result.data;
-          setImageData(base64Image);
-          setLoading(false);
-          await sendPhotoToAPI(base64Image, config);
-        } else {
-          console.warn('No image found in IndexedDB with ID:', id);
-          setSimilarImages([]);
-        }
-      };
-
-      // Setting the image and stopping the loading spinner
       setImageData(base64);
       setLoading(false);
-
       await sendPhotoToAPI(base64, config);
     } catch (e) {
       console.error('Error retrieving image from indexedDB', e);
