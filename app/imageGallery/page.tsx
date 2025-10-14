@@ -6,6 +6,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { AppConfig } from '@/types/config';
+import { getImageFromIndexedDB } from '../utils/indexedDbHelpers'; // Using helper
 
 interface SimilarImage {
   src: string;
@@ -22,6 +23,7 @@ function ImageGalleryContent() {
   const [imageData, setImageData] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Loading app config
   useEffect(() => {
     fetch('./setup.json')
       .then((response) => response.json())
@@ -52,16 +54,20 @@ function ImageGalleryContent() {
         }
       };
 
-      getRequest.onerror = () => {
-        console.error('Error retrieving image from IndexedDB.');
-      };
-    };
+      // Setting the image and stopping the loading spinner
+      setImageData(base64);
+      setLoading(false);
 
-    request.onerror = () => {
-      console.error('Failed to access IndexedDB.');
-    };
+      await sendPhotoToAPI(base64, config);
+    } catch (e) {
+      console.error('Error retrieving image from indexedDB', e);
+      setImageData(null);
+      setSimilarImages([]);
+      setLoading(false);
+    }
   };
 
+  // Sending base64 to the external API and collecting similar images
   const sendPhotoToAPI = async (base64Image: string, config: AppConfig) => {
     setIsSearching(true);
     setSimilarImages([]);
