@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // app/utils/imageOptimization.ts
 // Used to compress or resize images before saving
 // Works only on server side to avoid issues during build

@@ -1,4 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable tailwindcss/classnames-order */
+
 'use client';
+
+// Used to display a larger preview of an image when clicked
+// Clicking outside the box closes the model
 
 interface ImageModalProps {
   image: {
@@ -12,7 +18,7 @@ interface ImageModalProps {
 export default function ImageModal({ image, onClose }: ImageModalProps) {
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
       onClick={onClose}
     >
       <div

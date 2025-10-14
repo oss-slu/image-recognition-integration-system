@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
@@ -33,6 +35,7 @@ function ImageGalleryContent() {
     if (config && imageId) {
       retrieveImageAndSearch(imageId, config);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageId, config]);
 
   const retrieveImageAndSearch = (id: string, config: AppConfig) => {
