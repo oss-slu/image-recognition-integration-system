@@ -1,3 +1,5 @@
+/* eslint-disable tailwindcss/classnames-order */
+
 /* app/profile/page.tsx
  * very small “template profile” page
  * – shows a name and e-mail pulled from hard-coded vars for now –

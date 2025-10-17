@@ -3,7 +3,7 @@ import React from "react";
 
 export default function About() {
   return (
-    <div className="bg-gray-800 mx-auto max-w-3xl space-y-10 rounded-xl p-8 pb-16 text-white shadow-lg">
+    <div className="mx-auto max-w-3xl space-y-10 rounded-xl bg-gray-800 p-8 pb-16 text-white shadow-lg">
       <h1 className="text-3xl font-bold">About IRIS</h1>
 
       <p>
@@ -25,7 +25,7 @@ export default function About() {
       </p>
 
       <h2 className="text-2xl font-semibold">Meet the Team</h2>
-      <ul className="list-disc list-inside space-y-2">
+      <ul className="list-inside list-disc space-y-2">
         <li>
           <strong>Julian Shniter</strong> – Team Lead & Developer
           <br />
@@ -54,7 +54,7 @@ export default function About() {
       </ul>
 
       <h2 className="text-2xl font-semibold">Tech Stack</h2>
-      <ul className="list-disc list-inside space-y-2">
+      <ul className="list-inside list-disc space-y-2">
         <li><strong>Next.js</strong> – Frontend framework for server-rendered React apps.</li>
         <li><strong>React</strong> – Component-based UI library.</li>
         <li><strong>TailwindCSS</strong> – Utility-first CSS framework for styling.</li>
@@ -64,7 +64,7 @@ export default function About() {
       </ul>
 
       <h2 className="text-2xl font-semibold">Features</h2>
-      <ul className="list-disc list-inside space-y-2">
+      <ul className="list-inside list-disc space-y-2">
         <li>Modular architecture for easy customization.</li>
         <li>Integration of pre-trained machine learning models.</li>
         <li>Efficient image indexing and high-speed search capabilities.</li>

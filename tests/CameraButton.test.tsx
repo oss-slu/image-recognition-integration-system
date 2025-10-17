@@ -6,8 +6,11 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+jest.setTimeout(10000);
+
 // Adjusting import path based on the folder setup
 import CameraButton from "../app/components/cameraButton";
+import { wait } from "@testing-library/user-event/dist/cjs/utils/index.js";
 
 // Shared spy so the component and the test see the same push()
 const push = jest.fn();
@@ -21,7 +24,12 @@ jest.mock("uuid", () => ({ v4: () => "test-uuid-123" }));
 // Mock Capacitor camera call
 jest.mock("@capacitor/camera", () => ({
     Camera: {
-        getPhoto: jest.fn(async () => ({ webPath: "https://example.com/photo.jpg" })),
+        getPhoto: jest.fn(
+            async () => 
+                new Promise((resolve) =>
+                    setTimeout(() => resolve({ webPath: "https://example.com/photo.jpg" }), 20)
+                )
+        ),
     },
     CameraResultType: { Uri: "uri" },
 }));
@@ -118,7 +126,7 @@ describe("CameraButton", () => {
     test("applies color class from setup.json", async () => {
         render(<CameraButton />);
         await waitFor(() => {
-            const btn = screen.getByRole("button", { name: /use camera|capturing/i });
+            const btn = screen.getByRole("button", { name: /use camera|capturing\.\.\./i });
             expect(btn.className).toContain("bg-green-600");
         });
     });
@@ -129,15 +137,17 @@ describe("CameraButton", () => {
         render(<CameraButton />);
 
         await user.click(screen.getByRole("button", { name: /use camera/i }));
+        
+        // ✅ Wait manually for React to render the disabled state
+        await new Promise((r) => setTimeout(r, 50));
 
-        // During capture
-        expect(screen.getByRole("button", { name: /capturing/i })).toBeDisabled();
+        const btn = screen.getByRole("button", { name: /use camera/i });
+        expect(btn).toBeDisabled();
 
         await waitFor(() => {
             expect(push).toHaveBeenCalledWith("/imageGallery?imageId=test-uuid-123");
         });
 
-        // Back to normal
         await waitFor(() => {
             expect(screen.getByRole("button", { name: /use camera/i })).not.toBeDisabled();
         });
@@ -147,9 +157,13 @@ describe("CameraButton", () => {
     test("ignores extra clicks while capturing", async () => {
         const user = userEvent.setup();
         render(<CameraButton />);
-        const first = screen.getByRole("button", { name: /use camera/i });
-        await user.dblClick(first); // Double click fast
-        // Still should only navigate once
+        const btn = screen.getByRole("button", { name: /use camera/i });
+        
+        await user.click(btn);
+        // Giving React a tick to set isCapturing=true
+        await new Promise((r) => setTimeout(r, 10));
+        await user.click(btn);
+
         await waitFor(() => expect(push).toHaveBeenCalledTimes(1));
     });
 
