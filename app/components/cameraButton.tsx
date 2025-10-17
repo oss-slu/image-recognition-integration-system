@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { AppConfig } from "@/types/config";
-import { optimizeImage, logCompression } from "../utils/imageOptimization";
+import { optimizeImage, logCompression } from "@/app/utils/imageOptimization";
 
 
 const CameraButton = () => {
@@ -15,17 +15,13 @@ const CameraButton = () => {
 
     useEffect(() => {
         fetch(`./setup.json`)
-            .then((response) => response.json())
-            .then((data) => {
-                setConfig(data);
-            })
-            .catch((error) => {
-                console.error("Error loading config:", error);
-            });
-    }
-    , []);
+            .then((res) => res.json())
+            .then(setConfig)
+            .catch((err) => console.error("Error loading config:", err));
+    }, []);
    
     const takePhoto = async () => {
+        if (isCapturing) return;
         try {
             setIsCapturing(true);
             const photo = await Camera.getPhoto({
