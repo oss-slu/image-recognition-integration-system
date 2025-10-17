@@ -1,33 +1,37 @@
-// // lib/modelClient.ts
-// "use client";
+// app/lib/modelClient.ts
 
-// import { pipeline } from "@xenova/transformers";
+export type EmbeddingRequest = { imageId?: string; dataUrl?: string };
+export type EmbeddingResponse = { vector: number[] };
 
-// /** Singleton references to loaded pipelines */
-// let imageEmbedder: any = null;
+function isEmbeddingResponse(x: unknown): x is EmbeddingResponse {
+  const r = x as { vector?: unknown };
+  return Array.isArray(r?.vector) && r.vector.every((n) => typeof n === "number");
+}
 
-// /**
-//  * loading a CLIP embedding pipeline for image search (example).
-//  * this will make it easy to use other models
-//  */
-// export async function loadEmbeddingPipeline() {
-//   if (!imageEmbedder) {
-//     // Using CLIP for image embeddings, just as an example
-//     imageEmbedder = await pipeline(
-//       "feature-extraction",
-//       "Xenova/clip-vit-base-patch32"
-//     );
-//   }
-//   return imageEmbedder;
-// }
+/** Getying an embedding for an image by its ID (e.g., S3 key) via your embed API. */
+export async function getEmbeddingForImageId(id: string): Promise<number[]> {
+  const res = await fetch("/api/model/embed", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ imageId: id } as EmbeddingRequest),
+    cache: "no-store",
+  });
 
-// /**
-//  * Extract embeddings from an image. 
-//  * Returns a vector (array of floats) we can then compare with our dataset.
-//  */
-// export async function getImageEmbeddings(image: Blob | string) {
-//   const embedder = await loadEmbeddingPipeline();
-//   // The pipeline returns a nested array. We'll flatten or keep it nested as needed.
-//   const result = await embedder(image);
-//   return result; 
-// }
+  const json: unknown = await res.json();
+  if (!isEmbeddingResponse(json)) throw new Error("Bad embed response (imageId)");
+  return json.vector;
+}
+
+/** Getting an embedding for raw image data (e.g., data URL) via your embed API. */
+export async function getEmbeddingForImageData(dataUrl: string): Promise<number[]> {
+  const res = await fetch("/api/model/embed", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ dataUrl } as EmbeddingRequest),
+    cache: "no-store",
+  });
+
+  const json: unknown = await res.json();
+  if (!isEmbeddingResponse(json)) throw new Error("Bad embed response (dataUrl)");
+  return json.vector;
+}
