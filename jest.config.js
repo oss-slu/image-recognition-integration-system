@@ -16,6 +16,10 @@ const customJestConfig = {
     '^@/components/(.*)$': '<rootDir>/components/$1',
     '^@/app/(.*)$': '<rootDir>/app/$1',
   },
+  // Force development build of React for testing
+  globals: {
+    'process.env.NODE_ENV': 'development',
+  },
 };
 
 // createJestConfig is exported to ensure that Next.js' Babel configuration is applied

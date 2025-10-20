@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
@@ -31,38 +33,20 @@ function ImageGalleryContent() {
       });
   }, []);
 
-  // When we have config + imageId, retrieve from IndexedDB and kick off search
-  useEffect(() => {
-    if (!config) return;
-
-    // If there's no imageId, nothing to load — stopping the spinner and keeping UI clean
-    if (!imageId) {
-      setLoading(false); // Nothing to load, so stopping the spinner
-      setSimilarImages([]); // Keeping UI clean
-      return;
-    }
-
-    retrieveImageAndSearch(imageId, config);
-  }, [imageId, config]);
-
-  // Getting one image by id using helper, then calling API
+  // Retrieving image and trigger seard
   const retrieveImageAndSearch = async (id: string, config: AppConfig) => {
     try {
-      // Reading from IndexedDB via the shared helper
       const base64 = await getImageFromIndexedDB(id);
-
       if (!base64) {
-        console.warn('No image found in IndexedDb with ID:', id);
+        console.warn('No image found in IndexedDb with Id:', id);
         setImageData(null);
         setSimilarImages([]);
         setLoading(false);
         return;
       }
 
-      // Setting the image and stopping the loading spinner
       setImageData(base64);
       setLoading(false);
-
       await sendPhotoToAPI(base64, config);
     } catch (e) {
       console.error('Error retrieving image from indexedDB', e);
@@ -108,6 +92,14 @@ function ImageGalleryContent() {
     }
   };
 
+  // When config and imageId are ready, fetching image and running similarity search
+  useEffect(() => {
+    if (config && imageId) {
+      retrieveImageAndSearch(imageId, config);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageId, config]);
+
   if (!config) return <div className="text-center text-white">Loading config...</div>;
 
   return (
@@ -125,7 +117,13 @@ function ImageGalleryContent() {
             <p>Loading input image...</p>
           ) : imageData ? (
             <div className="mx-auto flex h-[200px] w-[300px] items-center justify-center overflow-hidden rounded-xl">
-              <img src={imageData} alt="Captured" className={`h-40 w-60 rounded-md object-cover ${config.cardBackground}`} />
+              {/* optimized image already in Base64 WebP */}
+              <img 
+                src={imageData} 
+                alt="Captured"
+                loading="lazy"
+                className={`h-40 w-60 rounded-md object-cover ${config.cardBackground}`} 
+              />
             </div>
           ) : (
             <p>No image found.</p>
@@ -148,6 +146,7 @@ function ImageGalleryContent() {
                     key={image.src}
                     src={image.src}
                     alt={image.alt}
+                    loading="lazy"
                     className={`h-40 w-full rounded-md object-cover ${config.cardBackground}`}
                   />
                 ))}
