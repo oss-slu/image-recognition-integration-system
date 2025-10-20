@@ -1,6 +1,7 @@
 // jest.setup.js
 import '@testing-library/jest-dom';
 import 'whatwg-fetch'
+import '@testing-library/jest-dom';
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
