@@ -15,7 +15,7 @@ export default function ProfilePage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-start p-8">
-      <h1 className="text-3xl font-bold mb-6">User Profile</h1>
+      <h1 className="mb-6 text-3xl font-bold">User Profile</h1>
 
       <div className="w-full max-w-md rounded-lg border p-6 shadow-md">
         <div className="mb-4">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { AppConfig } from '@/types/config';
@@ -19,7 +19,6 @@ function ImageGalleryContent() {
   const [isSearching, setIsSearching] = useState(false);
   const [imageData, setImageData] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     fetch('./setup.json')
       .then((response) => response.json())
@@ -29,44 +28,7 @@ function ImageGalleryContent() {
       });
   }, []);
 
-  useEffect(() => {
-    if (config && imageId) {
-      retrieveImageAndSearch(imageId, config);
-    }
-  }, [imageId, config]);
-
-  const retrieveImageAndSearch = (id: string, config: AppConfig) => {
-    const request = indexedDB.open('ImageStorageDB', 1);
-
-    request.onsuccess = () => {
-      const db = request.result;
-      const transaction = db.transaction('images', 'readonly');
-      const store = transaction.objectStore('images');
-      const getRequest = store.get(id);
-
-      getRequest.onsuccess = async () => {
-        if (getRequest.result) {
-          const base64Image = getRequest.result.data;
-          setImageData(base64Image);
-          setLoading(false);
-          await sendPhotoToAPI(base64Image, config);
-        } else {
-          console.warn('No image found in IndexedDB with ID:', id);
-          setSimilarImages([]);
-        }
-      };
-
-      getRequest.onerror = () => {
-        console.error('Error retrieving image from IndexedDB.');
-      };
-    };
-
-    request.onerror = () => {
-      console.error('Failed to access IndexedDB.');
-    };
-  };
-
-  const sendPhotoToAPI = async (base64Image: string, config: AppConfig) => {
+  const sendPhotoToAPI = useCallback(async (base64Image: string, config: AppConfig) => {
     setIsSearching(true);
     setSimilarImages([]);
 
@@ -99,7 +61,44 @@ function ImageGalleryContent() {
     } finally {
       setIsSearching(false);
     }
-  };
+  }, []);
+
+  const retrieveImageAndSearch = useCallback((id: string, config: AppConfig) => {
+    const request = indexedDB.open('ImageStorageDB', 1);
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction('images', 'readonly');
+      const store = transaction.objectStore('images');
+      const getRequest = store.get(id);
+
+      getRequest.onsuccess = async () => {
+        if (getRequest.result) {
+          const base64Image = getRequest.result.data;
+          setImageData(base64Image);
+          setLoading(false);
+          await sendPhotoToAPI(base64Image, config);
+        } else {
+          console.warn('No image found in IndexedDB with ID:', id);
+          setSimilarImages([]);
+        }
+      };
+
+      getRequest.onerror = () => {
+        console.error('Error retrieving image from IndexedDB.');
+      };
+    };
+
+    request.onerror = () => {
+      console.error('Failed to access IndexedDB.');
+    };
+  }, [sendPhotoToAPI]);
+
+  useEffect(() => {
+    if (config && imageId) {
+      retrieveImageAndSearch(imageId, config);
+    }
+  }, [imageId, config, retrieveImageAndSearch]);
 
   if (!config) return <div className="text-center text-white">Loading config...</div>;
 
@@ -118,6 +117,7 @@ function ImageGalleryContent() {
             <p>Loading input image...</p>
           ) : imageData ? (
             <div className="mx-auto flex h-[200px] w-[300px] items-center justify-center overflow-hidden rounded-xl">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={imageData} alt="Captured" className={`h-40 w-60 rounded-md object-cover ${config.cardBackground}`} />
             </div>
           ) : (
@@ -137,6 +137,7 @@ function ImageGalleryContent() {
               </h2>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                 {similarImages.map((image) => (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={image.src}
                     src={image.src}
