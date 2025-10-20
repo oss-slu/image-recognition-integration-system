@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { AppConfig } from '@/types/config';
-import { getImageFromIndexedDB } from '../utils/indexedDbHelpers'; // Using helper
+import { getImageFromIndexedDB } from '../utils/indexedDbHelpers';
 
 interface SimilarImage {
   src: string;
@@ -21,7 +21,6 @@ function ImageGalleryContent() {
   const [imageData, setImageData] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Loading app config
   useEffect(() => {
     fetch('./setup.json')
       .then((response) => response.json())
@@ -31,82 +30,76 @@ function ImageGalleryContent() {
       });
   }, []);
 
-  // When we have config + imageId, retrieve from IndexedDB and kick off search
+  // Previously helper functions for retrieving and sending the image were
+  // declared here. The logic has been inlined into the effect below to
+  // satisfy react-hooks/exhaustive-deps and avoid stale closures.
+
   useEffect(() => {
     if (!config) return;
 
-    // If there's no imageId, nothing to load — stopping the spinner and keeping UI clean
     if (!imageId) {
-      setLoading(false); // Nothing to load, so stopping the spinner
-      setSimilarImages([]); // Keeping UI clean
+      setLoading(false);
+      setSimilarImages([]);
       return;
     }
 
-    retrieveImageAndSearch(imageId, config);
-  }, [imageId, config]);
+    const runSearch = async () => {
+      setIsSearching(true);
+      setSimilarImages([]);
 
-  // Getting one image by id using helper, then calling API
-  const retrieveImageAndSearch = async (id: string, config: AppConfig) => {
-    try {
-      // Reading from IndexedDB via the shared helper
-      const base64 = await getImageFromIndexedDB(id);
+      try {
+        const base64 = await getImageFromIndexedDB(imageId);
 
-      if (!base64) {
-        console.warn('No image found in IndexedDb with ID:', id);
+        if (!base64) {
+          console.warn('No image found in IndexedDb with ID:', imageId);
+          setImageData(null);
+          setSimilarImages([]);
+          setLoading(false);
+          return;
+        }
+
+        setImageData(base64);
+        setLoading(false);
+
+        try {
+          const { data } = await axios.post(
+            config.imageApiUrl,
+            { image: base64 },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+              },
+              withCredentials: false,
+            }
+          );
+
+          if (data?.similar_images && Array.isArray(data.similar_images)) {
+            const formatted = data.similar_images.map((url: string, index: number) => ({
+              src: url,
+              alt: `Similar Image ${index + 1}`,
+            }));
+            setSimilarImages(formatted);
+          } else {
+            console.error('Unexpected API response format:', data);
+            setSimilarImages([]);
+          }
+        } catch (error) {
+          console.error('API request failed:', error);
+          setSimilarImages([]);
+        }
+      } catch (e) {
+        console.error('Error retrieving image from indexedDB', e);
         setImageData(null);
         setSimilarImages([]);
         setLoading(false);
-        return;
+      } finally {
+        setIsSearching(false);
       }
+    };
 
-      // Setting the image and stopping the loading spinner
-      setImageData(base64);
-      setLoading(false);
-
-      await sendPhotoToAPI(base64, config);
-    } catch (e) {
-      console.error('Error retrieving image from indexedDB', e);
-      setImageData(null);
-      setSimilarImages([]);
-      setLoading(false);
-    }
-  };
-
-  // Sending base64 to the external API and collecting similar images
-  const sendPhotoToAPI = async (base64Image: string, config: AppConfig) => {
-    setIsSearching(true);
-    setSimilarImages([]);
-
-    try {
-      const { data } = await axios.post(
-        config.imageApiUrl,
-        { image: base64Image },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          withCredentials: false,
-        }
-      );
-
-      if (data?.similar_images && Array.isArray(data.similar_images)) {
-        const formatted = data.similar_images.map((url: string, index: number) => ({
-          src: url,
-          alt: `Similar Image ${index + 1}`,
-        }));
-        setSimilarImages(formatted);
-      } else {
-        console.error('Unexpected API response format:', data);
-        setSimilarImages([]);
-      }
-    } catch (error) {
-      console.error('API request failed:', error);
-      setSimilarImages([]);
-    } finally {
-      setIsSearching(false);
-    }
-  };
+    void runSearch();
+  }, [imageId, config]);
 
   if (!config) return <div className="text-center text-white">Loading config...</div>;
 
@@ -125,6 +118,7 @@ function ImageGalleryContent() {
             <p>Loading input image...</p>
           ) : imageData ? (
             <div className="mx-auto flex h-[200px] w-[300px] items-center justify-center overflow-hidden rounded-xl">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={imageData} alt="Captured" className={`h-40 w-60 rounded-md object-cover ${config.cardBackground}`} />
             </div>
           ) : (
@@ -144,6 +138,7 @@ function ImageGalleryContent() {
               </h2>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                 {similarImages.map((image) => (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={image.src}
                     src={image.src}

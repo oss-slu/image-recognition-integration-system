@@ -1,18 +1,18 @@
 import Image from "next/image"
 
-interface ImageItem {
+export interface ImageItem {
   src: string
   alt: string
   caption?: string
 }
 
-interface ImageGridProps {
+export interface ImageGridProps {
     images: ImageItem[]
     captionBgClass?: string
     captionTextClass?: string
   }
 
-export default function ImageGrid({ images, captionBgClass = "bg-black bg-opacity-50", captionTextClass = "text-white" }: ImageGridProps) {
+export default function ImageGrid({ images, captionBgClass = "bg-black/50", captionTextClass = "text-white" }: ImageGridProps) {
   return (
     <div className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-3 md:grid-cols-4">
 
