@@ -8,6 +8,7 @@ export const apiUrl =
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 // Singleton references to the loaded image embedding pipeline
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let imageEmbedder: any = null;
 
 /**
