@@ -1,5 +1,11 @@
-"use client";
-import React from "react";
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable tailwindcss/classnames-order */
+
+'use client';
+
+// Used to display a larger preview of an image when clicked
+// Clicking outside the box closes the model
+
 interface ImageModalProps {
   image: {
     id: string;

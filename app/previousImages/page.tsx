@@ -46,7 +46,11 @@ export default function PreviousImages() {
     return (
         <div className="flex min-h-screen flex-col">
 
+<<<<<<< HEAD
   <header className={`sticky top-0 z-10 border-b backdrop-blur ${config?.appBackground} ${config?.borderColor} bg-white/95`}>
+=======
+  <header className={`sticky top-0 z-10 border-b bg-black/95 backdrop-blur ${config?.appBackground} ${config?.borderColor}`}>
+>>>>>>> upstream/main
   <div
     className="container flex items-center"
     style={{

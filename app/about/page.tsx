@@ -133,6 +133,7 @@ export default function About() {
 
       <h2 className="text-2xl font-semibold">Tech Stack</h2>
       <ul className="list-inside list-disc space-y-2">
+<<<<<<< HEAD
         <li>
           <strong>Next.js</strong> – Frontend framework for server-rendered
           React apps.
@@ -154,6 +155,14 @@ export default function About() {
         <li>
           <strong>Docker</strong> – Containerization for consistent deployment.
         </li>
+=======
+        <li><strong>Next.js</strong> – Frontend framework for server-rendered React apps.</li>
+        <li><strong>React</strong> – Component-based UI library.</li>
+        <li><strong>TailwindCSS</strong> – Utility-first CSS framework for styling.</li>
+        <li><strong>Python</strong> – Backend development and scripting.</li>
+        <li><strong>TensorFlow / PyTorch</strong> – Machine learning frameworks for model integration.</li>
+        <li><strong>Docker</strong> – Containerization for consistent deployment.</li>
+>>>>>>> upstream/main
       </ul>
 
       <h2 className="text-2xl font-semibold">Features</h2>

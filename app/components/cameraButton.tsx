@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { AppConfig } from "@/types/config";
+import { optimizeImage, logCompression } from "../utils/imageOptimization";
 
 
 const CameraButton = () => {
@@ -38,17 +39,30 @@ const CameraButton = () => {
             }
 
             console.log("Photo captured:", photo.webPath);
-            // Convert to Base64 before sending
-            const base64Image = await convertToBase64(photo.webPath);
+
+            // Converting URI -> blob -> buffer for optimization
+            const response = await fetch(photo.webPath);
+            const blob = await response.blob();
+            const arrayBuffer = await blob.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            const before = buffer.byteLength;
             
-            // Generate a random UUID for this image
+            // Compressing image using Sharp (server-side)
+            const optimizedBuffer = await optimizeImage(buffer);
+            const after = optimizedBuffer.byteLength;
+            
+            // Log compression info
+            logCompression(before, after);
+
+            // Converting optimized buffer -> Base64
+            const base64Optimized = await bufferToBase64(optimizedBuffer);
+
+            // Generating image ID and storing optimized version
             const imageId = uuidv4();
-            console.log("Generated image ID:", imageId);
+            console.log("Generating image ID:", imageId);
+            await storeImageInIndexedDB(imageId, base64Optimized)
             
-            // Store Base64 image in IndexedDB with UUID
-            await storeImageInIndexedDB(imageId, base64Image);
-            
-            // Redirect to Image Gallery with the UUID
+            // Redirecting to gallery
             router.push(`/imageGallery?imageId=${imageId}`);
         } catch (error) {
             console.error("Camera error:", error);
@@ -57,25 +71,21 @@ const CameraButton = () => {
         }
     };
 
-    const convertToBase64 = (imageUri: string): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            fetch(imageUri)
-                .then(response => response.blob())
-                .then(blob => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(blob);
-                    reader.onloadend = () => {
-                        if (typeof reader.result === "string") {
-                            resolve(reader.result); // Base64 string
-                        } else {
-                            reject("Failed to convert image to Base64");
-                        }
-                    };
-                })
-                .catch(error => reject(error));
+    // Converting buffer to Base64
+    const bufferToBase64 = (buffer: Buffer): Promise<string> => {
+        return new Promise((resolve) => {
+            const blob = new Blob([buffer], { type: "image/webp" });
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = () => {
+                if (typeof reader.result === "string") {
+                    resolve(reader.result); // Base64 string
+                }
+            };
         });
     };
     
+    // Stores optimized Base64 image in IndexedDB
     const storeImageInIndexedDB = (imageId: string, base64Image: string) => {
         return new Promise<void>((resolve, reject) => {
             const request = indexedDB.open("ImageStorageDB", 1);

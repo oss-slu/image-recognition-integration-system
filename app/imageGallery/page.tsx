@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 'use client';
 
 import { useEffect, useState, Suspense, useCallback } from 'react';
@@ -31,8 +33,31 @@ function ImageGalleryContent() {
       });
   }, []);
 
-  // Send base64 image to the external API and collect similar images
-  const sendPhotoToAPI = useCallback(async (base64Image: string, cfg: AppConfig) => {
+  // Retrieving image and trigger seard
+  const retrieveImageAndSearch = async (id: string, config: AppConfig) => {
+    try {
+      const base64 = await getImageFromIndexedDB(id);
+      if (!base64) {
+        console.warn('No image found in IndexedDb with Id:', id);
+        setImageData(null);
+        setSimilarImages([]);
+        setLoading(false);
+        return;
+      }
+
+      setImageData(base64);
+      setLoading(false);
+      await sendPhotoToAPI(base64, config);
+    } catch (e) {
+      console.error('Error retrieving image from indexedDB', e);
+      setImageData(null);
+      setSimilarImages([]);
+      setLoading(false);
+    }
+  };
+
+  // Sending base64 to the external API and collecting similar images
+  const sendPhotoToAPI = async (base64Image: string, config: AppConfig) => {
     setIsSearching(true);
     setSimilarImages([]);
 
@@ -65,40 +90,7 @@ function ImageGalleryContent() {
     } finally {
       setIsSearching(false);
     }
-  }, []);
-
-  // When config + imageId available, get image from IndexedDB and search
-  const retrieveImageAndSearch = useCallback(async (id: string, cfg: AppConfig) => {
-    try {
-      const base64 = await getImageFromIndexedDB(id);
-      if (!base64) {
-        console.warn('No image found in IndexedDB with ID:', id);
-        setImageData(null);
-        setSimilarImages([]);
-        setLoading(false);
-        return;
-      }
-
-      setImageData(base64);
-      setLoading(false);
-      await sendPhotoToAPI(base64, cfg);
-    } catch (err) {
-      console.error('Failed retrieving image and searching:', err);
-      setImageData(null);
-      setSimilarImages([]);
-      setLoading(false);
-    }
-  }, [sendPhotoToAPI]);
-
-  useEffect(() => {
-    if (!config) return;
-    if (!imageId) {
-      setLoading(false);
-      setSimilarImages([]);
-      return;
-    }
-    retrieveImageAndSearch(imageId, config);
-  }, [imageId, config, retrieveImageAndSearch]);
+  };
 
   if (!config) return <div className="text-center text-white">Loading config...</div>;
 
@@ -117,7 +109,6 @@ function ImageGalleryContent() {
             <p>Loading input image...</p>
           ) : imageData ? (
             <div className="mx-auto flex h-[200px] w-[300px] items-center justify-center overflow-hidden rounded-xl">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={imageData} alt="Captured" className={`h-40 w-60 rounded-md object-cover ${config.cardBackground}`} />
             </div>
           ) : (
@@ -142,6 +133,7 @@ function ImageGalleryContent() {
                     key={image.src}
                     src={image.src}
                     alt={image.alt}
+                    loading="lazy"
                     className={`h-40 w-full rounded-md object-cover ${config.cardBackground}`}
                   />
                 ))}
