@@ -1,0 +1,489 @@
+From c3aacdcadd2dc987898c1bd329d5d246f7414510 Mon Sep 17 00:00:00 2001
+From: Bre Naidu <brehananaidu@gmail.com>
+Date: Sun, 26 Oct 2025 21:02:28 -0500
+Subject: [PATCH] Accessibility: add ARIA labels, keyboard navigation, and
+ focus & modal focus management
+
+---
+ app/Authenticate/ImageModal.tsx  |  32 +++++++-
+ app/LayoutShell.tsx              |  11 ++-
+ app/components/cameraButton.tsx  |   5 +-
+ app/components/imageModal.tsx    |  39 +++++++++-
+ app/components/navigationBar.tsx |  29 +++----
+ app/imageGallery/page.tsx        | 129 +++++++++++++++----------------
+ app/loginscreen/page.tsx         |  27 ++++---
+ 7 files changed, 179 insertions(+), 93 deletions(-)
+
+diff --git a/app/Authenticate/ImageModal.tsx b/app/Authenticate/ImageModal.tsx
+index d1aff15..924adcb 100644
+--- a/app/Authenticate/ImageModal.tsx
++++ b/app/Authenticate/ImageModal.tsx
+@@ -12,14 +12,42 @@ interface ImageModalProps {
+ }
+ 
+ export default function ImageModal({ image, onClose }: ImageModalProps) {
++  const closeButtonRef = React.useRef<HTMLButtonElement | null>(null);
++
++  React.useEffect(() => {
++    const prev = document.activeElement as HTMLElement | null;
++
++    const onKey = (e: KeyboardEvent) => {
++      if (e.key === "Escape") onClose();
++      if (e.key === "Tab") {
++        const focusable = closeButtonRef.current ? [closeButtonRef.current] : [];
++        if (focusable.length === 1) {
++          e.preventDefault();
++          focusable[0].focus();
++        }
++      }
++    };
++
++    document.addEventListener("keydown", onKey);
++    setTimeout(() => closeButtonRef.current?.focus(), 0);
++    return () => {
++      document.removeEventListener("keydown", onKey);
++      prev?.focus();
++    };
++  }, [onClose]);
++
+   return (
+     <div
+       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+       onClick={onClose}
++      aria-hidden={false}
+     >
+       <div
+         className="mx-auto max-w-md rounded-lg bg-white p-4"
+         onClick={(e) => e.stopPropagation()}
++        role="dialog"
++        aria-modal="true"
++        aria-label="Image details"
+       >
+         {/* eslint-disable-next-line @next/next/no-img-element */}
+         <img src={image.data} alt="Expanded" className="mb-4 rounded-md" />
+@@ -33,8 +61,10 @@ export default function ImageModal({ image, onClose }: ImageModalProps) {
+           </p>
+         </div>
+         <button
+-          className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
++          ref={closeButtonRef}
++          className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
+           onClick={onClose}
++          aria-label="Close image dialog"
+         >
+           Close
+         </button>
+diff --git a/app/LayoutShell.tsx b/app/LayoutShell.tsx
+index f60fde4..6ec8bb8 100644
+--- a/app/LayoutShell.tsx
++++ b/app/LayoutShell.tsx
+@@ -33,8 +33,17 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
+ 
+   return (
+     <div className={`${config?.appBackground} ${config?.textColor} min-h-screen`}>
++      {/* Skip link for keyboard users */}
++      <a
++        href="#main-content"
++        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:px-3 focus:py-2 focus:rounded"
++      >
++        Skip to content
++      </a>
+       <NavigationBar />
+-      {children}
++      <main id="main-content" tabIndex={-1}>
++        {children}
++      </main>
+     </div>
+   );
+ }
+diff --git a/app/components/cameraButton.tsx b/app/components/cameraButton.tsx
+index bddb42e..1868b01 100644
+--- a/app/components/cameraButton.tsx
++++ b/app/components/cameraButton.tsx
+@@ -112,10 +112,11 @@ const CameraButton = () => {
+     };
+ 
+     return (
+-        <button 
+-            className={`px-4 py-2 ${config?.cameraButtonColor} rounded-lg text-white shadow-md`}
++        <button
++            className={`px-4 py-2 ${config?.cameraButtonColor} rounded-lg text-white shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400`}
+             onClick={takePhoto}
+             disabled={isCapturing}
++            aria-label={isCapturing ? "Capturing image" : "Use Camera"}
+         >
+             {isCapturing ? "Capturing..." : "Use Camera"}
+         </button>
+diff --git a/app/components/imageModal.tsx b/app/components/imageModal.tsx
+index 6f0e267..6661476 100644
+--- a/app/components/imageModal.tsx
++++ b/app/components/imageModal.tsx
+@@ -1,4 +1,5 @@
+ "use client";
++import React from "react";
+ interface ImageModalProps {
+   image: {
+     id: string;
+@@ -9,14 +10,48 @@ interface ImageModalProps {
+ }
+ 
+ export default function ImageModal({ image, onClose }: ImageModalProps) {
++  const closeButtonRef = React.useRef<HTMLButtonElement | null>(null);
++
++  React.useEffect(() => {
++    const prev = document.activeElement as HTMLElement | null;
++
++    const onKey = (e: KeyboardEvent) => {
++      if (e.key === "Escape") {
++        onClose();
++      }
++      // Basic focus trap: keep focus inside modal
++      if (e.key === "Tab") {
++        const focusable = closeButtonRef.current ? [closeButtonRef.current] : [];
++        if (focusable.length === 1) {
++          e.preventDefault();
++          focusable[0].focus();
++        }
++      }
++    };
++
++    document.addEventListener("keydown", onKey);
++
++    // autofocus close button
++    setTimeout(() => closeButtonRef.current?.focus(), 0);
++
++    return () => {
++      document.removeEventListener("keydown", onKey);
++      // restore focus to previous element
++      prev?.focus();
++    };
++  }, [onClose]);
+   return (
+     <div
+       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+       onClick={onClose}
++      aria-hidden={false}
+     >
+       <div
+         className="mx-auto max-w-md rounded-lg bg-white p-4"
+         onClick={(e) => e.stopPropagation()}
++        role="dialog"
++        aria-modal="true"
++        aria-label="Image details"
+       >
+         {/* eslint-disable-next-line @next/next/no-img-element */}
+         <img src={image.data} alt="Expanded" className="mb-4 rounded-md" />
+@@ -30,8 +65,10 @@ export default function ImageModal({ image, onClose }: ImageModalProps) {
+           </p>
+         </div>
+         <button
+-          className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
++          ref={closeButtonRef}
++          className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
+           onClick={onClose}
++          aria-label="Close image dialog"
+         >
+           Close
+         </button>
+diff --git a/app/components/navigationBar.tsx b/app/components/navigationBar.tsx
+index d95e1e9..b82db0f 100644
+--- a/app/components/navigationBar.tsx
++++ b/app/components/navigationBar.tsx
+@@ -2,33 +2,36 @@ import Link from "next/link";
+ 
+ const BottomNav = () => {
+   return (
+-    <nav className="fixed inset-x-0 bottom-0 z-20 flex w-full justify-around border-t bg-white py-2 shadow-md">
++    <nav
++      className="fixed inset-x-0 bottom-0 z-20 flex w-full justify-around border-t bg-white py-2 shadow-md"
++      aria-label="Primary"
++    >
+       <Link href="/">
+-        <div className="flex cursor-pointer flex-col items-center text-gray-700">
+-          <div className="size-6 rounded-full bg-gray-500"></div>
++        <a className="flex flex-col items-center text-gray-700" aria-label="Home">
++          <div className="size-6 rounded-full bg-gray-500" aria-hidden="true"></div>
+           <span className="text-xs">Home</span>
+-        </div>
++        </a>
+       </Link>
+ 
+       <Link href="/profile">
+-        <div className="flex cursor-pointer flex-col items-center text-gray-700">
+-          <div className="size-6 rounded-full bg-gray-500"></div>
++        <a className="flex flex-col items-center text-gray-700" aria-label="Profile">
++          <div className="size-6 rounded-full bg-gray-500" aria-hidden="true"></div>
+           <span className="text-xs">Profile</span>
+-        </div>
++        </a>
+       </Link>
+ 
+       <Link href="/about">
+-        <div className="flex cursor-pointer flex-col items-center text-gray-700">
+-          <div className="size-6 rounded-full bg-gray-500"></div>
++        <a className="flex flex-col items-center text-gray-700" aria-label="About">
++          <div className="size-6 rounded-full bg-gray-500" aria-hidden="true"></div>
+           <span className="text-xs">About</span>
+-        </div>
++        </a>
+       </Link>
+ 
+       <Link href="/previousImages">
+-        <div className="flex cursor-pointer flex-col items-center text-gray-700">
+-          <div className="size-6 rounded-full bg-gray-500"></div>
++        <a className="flex flex-col items-center text-gray-700" aria-label="Previous Images">
++          <div className="size-6 rounded-full bg-gray-500" aria-hidden="true"></div>
+           <span className="text-xs">Previous Images</span>
+-        </div>
++        </a>
+       </Link>
+     </nav>
+   );
+diff --git a/app/imageGallery/page.tsx b/app/imageGallery/page.tsx
+index 936c0ae..9042a28 100644
+--- a/app/imageGallery/page.tsx
++++ b/app/imageGallery/page.tsx
+@@ -1,10 +1,10 @@
+ 'use client';
+ 
+-import { useEffect, useState, Suspense } from 'react';
++import { useEffect, useState, Suspense, useCallback } from 'react';
+ import { useSearchParams } from 'next/navigation';
+ import axios from 'axios';
+ import { AppConfig } from '@/types/config';
+-import { getImageFromIndexedDB } from '../utils/indexedDbHelpers';
++import { getImageFromIndexedDB } from '../utils/indexedDbHelpers'; // Using helper
+ 
+ interface SimilarImage {
+   src: string;
+@@ -21,6 +21,7 @@ function ImageGalleryContent() {
+   const [imageData, setImageData] = useState<string | null>(null);
+   const [loading, setLoading] = useState(true);
+ 
++  // Load app config once
+   useEffect(() => {
+     fetch('./setup.json')
+       .then((response) => response.json())
+@@ -30,76 +31,74 @@ function ImageGalleryContent() {
+       });
+   }, []);
+ 
+-  // Previously helper functions for retrieving and sending the image were
+-  // declared here. The logic has been inlined into the effect below to
+-  // satisfy react-hooks/exhaustive-deps and avoid stale closures.
+-
+-  useEffect(() => {
+-    if (!config) return;
+-
+-    if (!imageId) {
+-      setLoading(false);
++  // Send base64 image to the external API and collect similar images
++  const sendPhotoToAPI = useCallback(async (base64Image: string, cfg: AppConfig) => {
++    setIsSearching(true);
++    setSimilarImages([]);
++
++    try {
++      const { data } = await axios.post(
++        cfg.imageApiUrl,
++        { image: base64Image },
++        {
++          headers: {
++            'Content-Type': 'application/json',
++            Accept: 'application/json',
++          },
++          withCredentials: false,
++        }
++      );
++
++      if (data?.similar_images && Array.isArray(data.similar_images)) {
++        const formatted = data.similar_images.map((url: string, index: number) => ({
++          src: url,
++          alt: `Similar Image ${index + 1}`,
++        }));
++        setSimilarImages(formatted);
++      } else {
++        console.error('Unexpected API response format:', data);
++        setSimilarImages([]);
++      }
++    } catch (error) {
++      console.error('API request failed:', error);
+       setSimilarImages([]);
+-      return;
++    } finally {
++      setIsSearching(false);
+     }
++  }, []);
+ 
+-    const runSearch = async () => {
+-      setIsSearching(true);
+-      setSimilarImages([]);
+-
+-      try {
+-        const base64 = await getImageFromIndexedDB(imageId);
+-
+-        if (!base64) {
+-          console.warn('No image found in IndexedDb with ID:', imageId);
+-          setImageData(null);
+-          setSimilarImages([]);
+-          setLoading(false);
+-          return;
+-        }
+-
+-        setImageData(base64);
+-        setLoading(false);
+-
+-        try {
+-          const { data } = await axios.post(
+-            config.imageApiUrl,
+-            { image: base64 },
+-            {
+-              headers: {
+-                'Content-Type': 'application/json',
+-                Accept: 'application/json',
+-              },
+-              withCredentials: false,
+-            }
+-          );
+-
+-          if (data?.similar_images && Array.isArray(data.similar_images)) {
+-            const formatted = data.similar_images.map((url: string, index: number) => ({
+-              src: url,
+-              alt: `Similar Image ${index + 1}`,
+-            }));
+-            setSimilarImages(formatted);
+-          } else {
+-            console.error('Unexpected API response format:', data);
+-            setSimilarImages([]);
+-          }
+-        } catch (error) {
+-          console.error('API request failed:', error);
+-          setSimilarImages([]);
+-        }
+-      } catch (e) {
+-        console.error('Error retrieving image from indexedDB', e);
++  // When config + imageId available, get image from IndexedDB and search
++  const retrieveImageAndSearch = useCallback(async (id: string, cfg: AppConfig) => {
++    try {
++      const base64 = await getImageFromIndexedDB(id);
++      if (!base64) {
++        console.warn('No image found in IndexedDB with ID:', id);
+         setImageData(null);
+         setSimilarImages([]);
+         setLoading(false);
+-      } finally {
+-        setIsSearching(false);
++        return;
+       }
+-    };
+ 
+-    void runSearch();
+-  }, [imageId, config]);
++      setImageData(base64);
++      setLoading(false);
++      await sendPhotoToAPI(base64, cfg);
++    } catch (err) {
++      console.error('Failed retrieving image and searching:', err);
++      setImageData(null);
++      setSimilarImages([]);
++      setLoading(false);
++    }
++  }, [sendPhotoToAPI]);
++
++  useEffect(() => {
++    if (!config) return;
++    if (!imageId) {
++      setLoading(false);
++      setSimilarImages([]);
++      return;
++    }
++    retrieveImageAndSearch(imageId, config);
++  }, [imageId, config, retrieveImageAndSearch]);
+ 
+   if (!config) return <div className="text-center text-white">Loading config...</div>;
+ 
+@@ -167,4 +166,4 @@ export default function ImageGallery() {
+ 
+     </Suspense>
+   );
+-}
++}
+\ No newline at end of file
+diff --git a/app/loginscreen/page.tsx b/app/loginscreen/page.tsx
+index cb9c5b3..a4300bd 100644
+--- a/app/loginscreen/page.tsx
++++ b/app/loginscreen/page.tsx
+@@ -28,41 +28,46 @@ const LoginScreen = () => {
+                 <h1 className="mb-2 text-4xl font-bold">Irls</h1>
+                 <h2 className="mb-8 text-xl font-semibold">Login</h2>
+ 
+-                <form onSubmit={handleSubmit} className="space-y-6">
++                <form onSubmit={handleSubmit} className="space-y-6" aria-label="Sign in form">
+                     <div>
+-                        <label className="mb-2 block text-lg">Email</label>
++                        <label htmlFor="email" className="mb-2 block text-lg">Email</label>
+                         <input
++                            id="email"
+                             data-testid="email-input"
+                             type="email"
+                             value={email}
+                             onChange={(e) => setEmail(e.target.value)}
+-                            className="w-full border-b border-black py-2 text-base focus:outline-none"
++                            className="w-full border-b border-black py-2 text-base focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-300"
+                             placeholder="Enter your email"
+                             required
++                            aria-required="true"
+                         />
+                     </div>
+                     <div>
+-                        <label className="mb-2 block text-lg">Password</label>
++                        <label htmlFor="password" className="mb-2 block text-lg">Password</label>
+                         <input
++                            id="password"
+                             data-testid="password-input"
+                             type="password"
+                             value={password}
+                             onChange={(e) => setPassword(e.target.value)}
+-                            className="w-full border-b border-black py-2 text-base focus:outline-none"
++                            className="w-full border-b border-black py-2 text-base focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-300"
+                             placeholder="Enter your password"
+                             required
++                            aria-required="true"
+                         />
+                     </div>
+                     <div 
+                         data-testid="forgot-password-text"
+                         className="text-right text-sm text-gray-700"
+                     >
+-                        Forgot Password?
++                        <button type="button" className="text-sm text-blue-600 underline focus:outline-none" aria-label="Forgot password">Forgot Password?</button>
+                     </div>
+                     <button
+                         data-testid="sign-in-button"
+                         type="submit"
+-                        className="mt-4 w-full rounded-2xl bg-primary py-3 text-lg text-white"
++                        className="mt-4 w-full rounded-2xl bg-primary py-3 text-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
++                        aria-label="Sign in"
+                     >
+                         Sign In
+                     </button>
+@@ -70,12 +75,14 @@ const LoginScreen = () => {
+ 
+                 <div className="mt-8 text-center text-sm">
+                     Don&apos;t have an account?{' '}
+-                    <span 
++                    <button
+                         data-testid="signup-text"
+-                        className="cursor-pointer font-semibold text-blue-700"
++                        className="cursor-pointer font-semibold text-blue-700 focus:outline-none"
++                        type="button"
++                        aria-label="Sign up"
+                     >
+                         Sign Up
+-                    </span>
++                    </button>
+                 </div>
+             </div>
+ 
+-- 
+2.46.2.windows.1
+
