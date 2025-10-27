@@ -33,8 +33,17 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
 
   return (
     <div className={`${config?.appBackground} ${config?.textColor} min-h-screen`}>
+      {/* Skip link for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:px-3 focus:py-2 focus:rounded"
+      >
+        Skip to content
+      </a>
       <NavigationBar />
-      {children}
+      <main id="main-content" tabIndex={-1}>
+        {children}
+      </main>
     </div>
   );
 }

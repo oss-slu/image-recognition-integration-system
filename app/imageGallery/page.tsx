@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { AppConfig } from '@/types/config';
-import { getImageFromIndexedDB } from '../utils/indexedDbHelpers';
+import { getImageFromIndexedDB } from '../utils/indexedDbHelpers'; // Using helper
 
 interface SimilarImage {
   src: string;
@@ -21,6 +21,7 @@ function ImageGalleryContent() {
   const [imageData, setImageData] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Load app config once
   useEffect(() => {
     fetch('./setup.json')
       .then((response) => response.json())
@@ -30,76 +31,74 @@ function ImageGalleryContent() {
       });
   }, []);
 
-  // Previously helper functions for retrieving and sending the image were
-  // declared here. The logic has been inlined into the effect below to
-  // satisfy react-hooks/exhaustive-deps and avoid stale closures.
+  // Send base64 image to the external API and collect similar images
+  const sendPhotoToAPI = useCallback(async (base64Image: string, cfg: AppConfig) => {
+    setIsSearching(true);
+    setSimilarImages([]);
+
+    try {
+      const { data } = await axios.post(
+        cfg.imageApiUrl,
+        { image: base64Image },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          withCredentials: false,
+        }
+      );
+
+      if (data?.similar_images && Array.isArray(data.similar_images)) {
+        const formatted = data.similar_images.map((url: string, index: number) => ({
+          src: url,
+          alt: `Similar Image ${index + 1}`,
+        }));
+        setSimilarImages(formatted);
+      } else {
+        console.error('Unexpected API response format:', data);
+        setSimilarImages([]);
+      }
+    } catch (error) {
+      console.error('API request failed:', error);
+      setSimilarImages([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
+
+  // When config + imageId available, get image from IndexedDB and search
+  const retrieveImageAndSearch = useCallback(async (id: string, cfg: AppConfig) => {
+    try {
+      const base64 = await getImageFromIndexedDB(id);
+      if (!base64) {
+        console.warn('No image found in IndexedDB with ID:', id);
+        setImageData(null);
+        setSimilarImages([]);
+        setLoading(false);
+        return;
+      }
+
+      setImageData(base64);
+      setLoading(false);
+      await sendPhotoToAPI(base64, cfg);
+    } catch (err) {
+      console.error('Failed retrieving image and searching:', err);
+      setImageData(null);
+      setSimilarImages([]);
+      setLoading(false);
+    }
+  }, [sendPhotoToAPI]);
 
   useEffect(() => {
     if (!config) return;
-
     if (!imageId) {
       setLoading(false);
       setSimilarImages([]);
       return;
     }
-
-    const runSearch = async () => {
-      setIsSearching(true);
-      setSimilarImages([]);
-
-      try {
-        const base64 = await getImageFromIndexedDB(imageId);
-
-        if (!base64) {
-          console.warn('No image found in IndexedDb with ID:', imageId);
-          setImageData(null);
-          setSimilarImages([]);
-          setLoading(false);
-          return;
-        }
-
-        setImageData(base64);
-        setLoading(false);
-
-        try {
-          const { data } = await axios.post(
-            config.imageApiUrl,
-            { image: base64 },
-            {
-              headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-              },
-              withCredentials: false,
-            }
-          );
-
-          if (data?.similar_images && Array.isArray(data.similar_images)) {
-            const formatted = data.similar_images.map((url: string, index: number) => ({
-              src: url,
-              alt: `Similar Image ${index + 1}`,
-            }));
-            setSimilarImages(formatted);
-          } else {
-            console.error('Unexpected API response format:', data);
-            setSimilarImages([]);
-          }
-        } catch (error) {
-          console.error('API request failed:', error);
-          setSimilarImages([]);
-        }
-      } catch (e) {
-        console.error('Error retrieving image from indexedDB', e);
-        setImageData(null);
-        setSimilarImages([]);
-        setLoading(false);
-      } finally {
-        setIsSearching(false);
-      }
-    };
-
-    void runSearch();
-  }, [imageId, config]);
+    retrieveImageAndSearch(imageId, config);
+  }, [imageId, config, retrieveImageAndSearch]);
 
   if (!config) return <div className="text-center text-white">Loading config...</div>;
 

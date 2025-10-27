@@ -28,41 +28,46 @@ const LoginScreen = () => {
                 <h1 className="mb-2 text-4xl font-bold">Irls</h1>
                 <h2 className="mb-8 text-xl font-semibold">Login</h2>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6" aria-label="Sign in form">
                     <div>
-                        <label className="mb-2 block text-lg">Email</label>
+                        <label htmlFor="email" className="mb-2 block text-lg">Email</label>
                         <input
+                            id="email"
                             data-testid="email-input"
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full border-b border-black py-2 text-base focus:outline-none"
+                            className="w-full border-b border-black py-2 text-base focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-300"
                             placeholder="Enter your email"
                             required
+                            aria-required="true"
                         />
                     </div>
                     <div>
-                        <label className="mb-2 block text-lg">Password</label>
+                        <label htmlFor="password" className="mb-2 block text-lg">Password</label>
                         <input
+                            id="password"
                             data-testid="password-input"
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full border-b border-black py-2 text-base focus:outline-none"
+                            className="w-full border-b border-black py-2 text-base focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-300"
                             placeholder="Enter your password"
                             required
+                            aria-required="true"
                         />
                     </div>
                     <div 
                         data-testid="forgot-password-text"
                         className="text-right text-sm text-gray-700"
                     >
-                        Forgot Password?
+                        <button type="button" className="text-sm text-blue-600 underline focus:outline-none" aria-label="Forgot password">Forgot Password?</button>
                     </div>
                     <button
                         data-testid="sign-in-button"
                         type="submit"
-                        className="mt-4 w-full rounded-2xl bg-primary py-3 text-lg text-white"
+                        className="mt-4 w-full rounded-2xl bg-primary py-3 text-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
+                        aria-label="Sign in"
                     >
                         Sign In
                     </button>
@@ -70,12 +75,14 @@ const LoginScreen = () => {
 
                 <div className="mt-8 text-center text-sm">
                     Don&apos;t have an account?{' '}
-                    <span 
+                    <button
                         data-testid="signup-text"
-                        className="cursor-pointer font-semibold text-blue-700"
+                        className="cursor-pointer font-semibold text-blue-700 focus:outline-none"
+                        type="button"
+                        aria-label="Sign up"
                     >
                         Sign Up
-                    </span>
+                    </button>
                 </div>
             </div>
 
