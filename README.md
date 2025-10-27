@@ -12,7 +12,7 @@ IRIS is an open-source framework designed to help developers build AI-powered im
   - [Features](#features)
   - [Getting Started](#getting-started)
   - [Capacitor Setup](#capacitor-setup)
-  - [Configuration (`public/setup.json`)](#configuration-publicsetupjson)
+  - [Secure Configuration (`.env.local`)](#secure-configuration-envlocal)
   - [Project Structure](#project-structure)
     - [Pages (in `/app`)](#pages-in-app)
     - [Components (in `/app/components`)](#components-in-appcomponents)
@@ -31,7 +31,7 @@ The Image Recognition Integration System (IRIS) was created to streamline the de
 
 - **Cross-Platform**: Web app with static export, wrapped for iOS and Android via Capacitor.
 - **Modular Architecture**: Clear separation between pages, UI components, and backend clients.
-- **Configurable Styling & API**: `public/setup.json` controls theming and endpoint URLs without code changes.
+- **Secure Environment Configuration**: Uses `.env.local` for API URLs and credentials instead of public JSON.
 - **Persistent History**: Stores previous search images in IndexedDB for offline access.
 
 ---
@@ -114,32 +114,31 @@ To deploy IRIS as a native app on iOS or Android, follow these steps:
 
 ---
 
-## Configuration (`public/setup.json`)
+## Secure Configuration (`.env.local`)
 
-The file `public/setup.json` contains runtime configuration for theming and API endpoints without code changes:
+IRIS now uses environment-based configuration instead of a public JSON file
 
-```json
-{
-  "cameraButtonColor": "bg-green-500",
-  "imageApiUrl": "http://<YOUR_API_HOST>:<PORT>/search",
-  "appBackground": "bg-gray-900",
-  "cardBackground": "bg-gray-800",
-  "textColor": "text-gray-200",
-  "headingColor": "text-blue-500",
-  "borderColor": "border-gray-700",
-  "buttonPrimary": "bg-blue-500 text-white hover:bg-blue-600",
-  "buttonSecondary": "bg-slate-700 text-blue-200 hover:bg-slate-600"
-}
+### Environment Variables
+
+Create a `.env.local` file in the project root with:
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:5050
+API_SECRET_KEY=7b5ef4e74ed218a9d77ca03a3f74e86d
+ALLOWED_ORIGIN=http://localhost:3000
 ```
 
-- **cameraButtonColor**: Tailwind class for the camera trigger button.
-- **imageApiUrl**: URL of your image search API backend.
-- **appBackground**, **cardBackground**, **textColor**, **headingColor**, **borderColor**: Tailwind classes for consistent theming.
-- **buttonPrimary**, **buttonSecondary**: Text & background classes for button variants.
-
-Modify values here and reload the app to see changes.
+NEXT_PUBLIC_API_URL = URL of your backend (proxied through Express).
+API_SECRET_KEY = Secret key required for backend authentication.
+ALLOWED_ORIGIN = Domain allowed to access your backend.
 
 ---
+
+## CI/CD Security Validation
+
+This project includes an automated GitHub Action that blocks commits exposing
+sensitive configuration (e.g., public/setup.json or API keys).
+
+The workflow file is located at .github/workflows/security-scan.yml.
 
 ## Project Structure
 

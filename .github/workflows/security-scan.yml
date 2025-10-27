@@ -1,0 +1,38 @@
+name: Security Validation
+
+on:
+  push:
+    branches: [ main, fix/config-security ]
+  pull_request:
+    branches: [ main, fix/config-security ]
+
+jobs:
+  check-exposed-config:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Scan for sensitive files or patterns
+        run: |
+          echo "🔍 Scanning repository for exposed configuration..."
+          FOUND=false
+
+          # Block exposed config files
+          if [ -f "public/setup.json" ]; then
+            echo "Found public/setup.json — this file must not exist!"
+            FOUND=true
+          fi
+
+          # Search for environment keys or secrets accidentally committed
+          if grep -R --include="*.js" --include="*.ts" --include="*.env" "API_KEY" .; then
+            echo "Found API_KEY references in tracked files!"
+            FOUND=true
+          fi
+
+          if [ "$FOUND" = true ]; then
+            echo "Security validation failed — remove exposed configs before committing."
+            exit 1
+          else
+            echo "No exposed configuration found. Safe to proceed."
+          fi

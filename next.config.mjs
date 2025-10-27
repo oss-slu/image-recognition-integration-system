@@ -1,9 +1,12 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === 'production';
+
 const nextConfig = {
-    output: 'export',
+  // Only use static export in production
+  ...(isProd ? { output: 'export', images: { unoptimized: true } } : {}),
 
-    images: {unoptimized: true} // Disable image optimization
-
+  // For dev, keep image optimization and API routes active
+  reactStrictMode: true,
 };
 
 export default nextConfig;
