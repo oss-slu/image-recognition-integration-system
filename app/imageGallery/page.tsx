@@ -33,8 +33,44 @@ function ImageGalleryContent() {
       });
   }, []);
 
+  // Sending base64 to the external API and collecting similar images
+  const sendPhotoToAPI = useCallback(async (base64Image: string, config: AppConfig) => {
+    setIsSearching(true);
+    setSimilarImages([]);
+
+    try {
+      const { data } = await axios.post(
+        config.imageApiUrl,
+        { image: base64Image },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          withCredentials: false,
+        }
+      );
+
+      if (data?.similar_images && Array.isArray(data.similar_images)) {
+        const formatted: SimilarImage[] = data.similar_images.map((src: string, index: number) => ({
+          src,
+          alt: `Similar Image ${index + 1}`,
+        }));
+        setSimilarImages(formatted);
+      } else {
+        console.error('Unexpected API response format:', data);
+        setSimilarImages([]);
+      }
+    } catch (error) {
+      console.error('API request failed:', error);
+      setSimilarImages([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
+
   // Retrieving image and trigger seard
-  const retrieveImageAndSearch = async (id: string, config: AppConfig) => {
+  const retrieveImageAndSearch = useCallback(async (id: string, config: AppConfig) => {
     try {
       const base64 = await getImageFromIndexedDB(id);
       if (!base64) {
@@ -54,43 +90,20 @@ function ImageGalleryContent() {
       setSimilarImages([]);
       setLoading(false);
     }
-  };
+  }, [sendPhotoToAPI]);
 
-  // Sending base64 to the external API and collecting similar images
-  const sendPhotoToAPI = async (base64Image: string, config: AppConfig) => {
-    setIsSearching(true);
-    setSimilarImages([]);
-
-    try {
-      const { data } = await axios.post(
-        cfg.imageApiUrl,
-        { image: base64Image },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          withCredentials: false,
-        }
-      );
-
-      if (data?.similar_images && Array.isArray(data.similar_images)) {
-        const formatted = data.similar_images.map((url: string, index: number) => ({
-          src: url,
-          alt: `Similar Image ${index + 1}`,
-        }));
-        setSimilarImages(formatted);
-      } else {
-        console.error('Unexpected API response format:', data);
-        setSimilarImages([]);
-      }
-    } catch (error) {
-      console.error('API request failed:', error);
+  // When config + imageId available, get the image and run the search
+  useEffect(() => {
+    if (!config) return;
+    if (!imageId) {
+      setLoading(false);
       setSimilarImages([]);
-    } finally {
-      setIsSearching(false);
+      return;
     }
-  };
+
+    // Trigger retrieval and search
+    retrieveImageAndSearch(imageId, config);
+  }, [imageId, config]);
 
   if (!config) return <div className="text-center text-white">Loading config...</div>;
 
