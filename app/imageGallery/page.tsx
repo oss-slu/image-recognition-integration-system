@@ -103,7 +103,7 @@ function ImageGalleryContent() {
 
     // Trigger retrieval and search
     retrieveImageAndSearch(imageId, config);
-  }, [imageId, config]);
+  }, [imageId, config, retrieveImageAndSearch]);
 
   if (!config) return <div className="text-center text-white">Loading config...</div>;
 
