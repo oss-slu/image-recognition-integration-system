@@ -122,10 +122,11 @@ const CameraButton = () => {
     };
 
     return (
-        <button 
-            className={`px-4 py-2 ${config?.cameraButtonColor} rounded-lg text-white shadow-md`}
+        <button
+            className={`px-4 py-2 ${config?.cameraButtonColor} rounded-lg text-white shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2`}
             onClick={takePhoto}
             disabled={isCapturing}
+            aria-label={isCapturing ? "Capturing..." : "Use Camera"}
         >
             {isCapturing ? "Capturing..." : "Use Camera"}
         </button>

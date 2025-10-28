@@ -1,10 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
-/* eslint-disable tailwindcss/classnames-order */
+"use client";
 
-'use client';
-
-// Used to display a larger preview of an image when clicked
-// Clicking outside the box closes the model
+import React from "react";
 
 interface ImageModalProps {
   image: {
@@ -22,10 +18,7 @@ export default function ImageModal({ image, onClose }: ImageModalProps) {
     const prev = document.activeElement as HTMLElement | null;
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-      // Basic focus trap: keep focus inside modal
+      if (e.key === "Escape") onClose();
       if (e.key === "Tab") {
         const focusable = closeButtonRef.current ? [closeButtonRef.current] : [];
         if (focusable.length === 1) {
@@ -36,16 +29,13 @@ export default function ImageModal({ image, onClose }: ImageModalProps) {
     };
 
     document.addEventListener("keydown", onKey);
-
-    // autofocus close button
     setTimeout(() => closeButtonRef.current?.focus(), 0);
-
     return () => {
       document.removeEventListener("keydown", onKey);
-      // restore focus to previous element
       prev?.focus();
     };
   }, [onClose]);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"

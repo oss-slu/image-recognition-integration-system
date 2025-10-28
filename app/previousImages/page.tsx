@@ -46,7 +46,11 @@ export default function PreviousImages() {
     return (
         <div className="flex min-h-screen flex-col">
 
+<<<<<<< HEAD
+  <header className={`sticky top-0 z-10 border-b backdrop-blur ${config?.appBackground} ${config?.borderColor} bg-white/95`}>
+=======
   <header className={`sticky top-0 z-10 border-b bg-black/95 backdrop-blur ${config?.appBackground} ${config?.borderColor}`}>
+>>>>>>> upstream/main
   <div
     className="container flex items-center"
     style={{
@@ -57,7 +61,7 @@ export default function PreviousImages() {
     <div className="flex items-center gap-2">
       <Link href="/">
         <button className={`hover:opacity-80 ${config?.buttonPrimary}`}>
-          <ArrowLeft className="size-5" />
+          <ArrowLeft className="w-5 h-5" />
           <span className="sr-only">Back</span>
         </button>
       </Link>
@@ -86,14 +90,14 @@ export default function PreviousImages() {
                   </div>
                   <div className="flex gap-2">
                   <button
-                    className="size-8 text-blue-400 hover:opacity-80"
+                    className="w-8 h-8 text-blue-400 hover:opacity-80 flex items-center justify-center"
                     onClick={() => router.push(`/imageGallery?imageId=${item.id}`)}
                     >
-                    <Search className="size-4" />
+                    <Search className="w-4 h-4" />
                     <span className="sr-only">Search again</span>
                     </button>
                     <button
-                        className="size-8 text-red-500 hover:opacity-80"
+                        className="w-8 h-8 text-red-500 hover:opacity-80 flex items-center justify-center"
                         onClick={async () => {
                             try {
                             await deleteImageFromIndexedDB(item.id);
@@ -103,7 +107,7 @@ export default function PreviousImages() {
                             }
                         }}
                         >
-                        <Trash2 className="size-4" />
+            <Trash2 className="w-4 h-4" />
                         <span className="sr-only">Delete</span>
                     </button>
                   </div>
@@ -121,8 +125,8 @@ export default function PreviousImages() {
       <p className="text-xs text-gray-400">
       {images.length} items in history
       </p>
-      <button
-        className={`rounded border px-3 py-1 ${config?.borderColor} text-red-400 hover:bg-red-900/20`}
+  <button
+  className={`rounded border px-3 py-1 ${config?.borderColor} text-red-400 hover:bg-red-900/20`}
         onClick={async () => {
             try {
             await clearAllImagesFromIndexedDB();
@@ -133,7 +137,7 @@ export default function PreviousImages() {
             }
         }}
         >
-        <Trash2 className="mr-2 size-4" />
+    <Trash2 className="mr-2 w-4 h-4" />
         Clear History
     </button>
     </div>
