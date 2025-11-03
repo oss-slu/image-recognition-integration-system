@@ -1,0 +1,15 @@
+Accessibility improvements to make the app more usable by screen reader and keyboard-only users.
+
+What changed
+- Added ARIA labels for navigation links and key buttons
+- Added a "Skip to content" link and made the site content focusable (`LayoutShell`)
+- Improved modal accessibility (role="dialog", aria-modal, Escape-to-close, autofocus, restore focus)
+- Login form: associated labels, aria-required, accessible buttons
+- Replaced invalid Tailwind classnames (size-*) with standard w-/h- utilities
+- Fixed a merge conflict in `app/imageGallery/page.tsx`
+- Unit tests passed locally
+
+Checklist
+- [ ] Manual smoke test (navigate via keyboard)
+- [ ] Run automated axe scan (recommended)
+- [ ] Consider adding focus-trap-react for complex modals (follow-up)
