@@ -1,9 +1,12 @@
+/* eslint-disable @next/next/no-img-element */
+
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { AppConfig } from '@/types/config';
+import { getImageFromIndexedDB } from '../utils/indexedDbHelpers'; // Using helper
 
 interface SimilarImage {
   src: string;
@@ -20,6 +23,7 @@ function ImageGalleryContent() {
   const [imageData, setImageData] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Loading app config
   useEffect(() => {
     fetch('./setup.json')
       .then((response) => response.json())
@@ -29,43 +33,30 @@ function ImageGalleryContent() {
       });
   }, []);
 
-  useEffect(() => {
-    if (config && imageId) {
-      retrieveImageAndSearch(imageId, config);
+  // Retrieving image and trigger seard
+  const retrieveImageAndSearch = async (id: string, config: AppConfig) => {
+    try {
+      const base64 = await getImageFromIndexedDB(id);
+      if (!base64) {
+        console.warn('No image found in IndexedDb with Id:', id);
+        setImageData(null);
+        setSimilarImages([]);
+        setLoading(false);
+        return;
+      }
+
+      setImageData(base64);
+      setLoading(false);
+      await sendPhotoToAPI(base64, config);
+    } catch (e) {
+      console.error('Error retrieving image from indexedDB', e);
+      setImageData(null);
+      setSimilarImages([]);
+      setLoading(false);
     }
-  }, [imageId, config]);
-
-  const retrieveImageAndSearch = (id: string, config: AppConfig) => {
-    const request = indexedDB.open('ImageStorageDB', 1);
-
-    request.onsuccess = () => {
-      const db = request.result;
-      const transaction = db.transaction('images', 'readonly');
-      const store = transaction.objectStore('images');
-      const getRequest = store.get(id);
-
-      getRequest.onsuccess = async () => {
-        if (getRequest.result) {
-          const base64Image = getRequest.result.data;
-          setImageData(base64Image);
-          setLoading(false);
-          await sendPhotoToAPI(base64Image, config);
-        } else {
-          console.warn('No image found in IndexedDB with ID:', id);
-          setSimilarImages([]);
-        }
-      };
-
-      getRequest.onerror = () => {
-        console.error('Error retrieving image from IndexedDB.');
-      };
-    };
-
-    request.onerror = () => {
-      console.error('Failed to access IndexedDB.');
-    };
   };
 
+  // Sending base64 to the external API and collecting similar images
   const sendPhotoToAPI = async (base64Image: string, config: AppConfig) => {
     setIsSearching(true);
     setSimilarImages([]);
@@ -101,6 +92,14 @@ function ImageGalleryContent() {
     }
   };
 
+  // When config and imageId are ready, fetching image and running similarity search
+  useEffect(() => {
+    if (config && imageId) {
+      retrieveImageAndSearch(imageId, config);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageId, config]);
+
   if (!config) return <div className="text-center text-white">Loading config...</div>;
 
   return (
@@ -118,7 +117,13 @@ function ImageGalleryContent() {
             <p>Loading input image...</p>
           ) : imageData ? (
             <div className="mx-auto flex h-[200px] w-[300px] items-center justify-center overflow-hidden rounded-xl">
-              <img src={imageData} alt="Captured" className={`h-40 w-60 rounded-md object-cover ${config.cardBackground}`} />
+              {/* optimized image already in Base64 WebP */}
+              <img 
+                src={imageData} 
+                alt="Captured"
+                loading="lazy"
+                className={`h-40 w-60 rounded-md object-cover ${config.cardBackground}`} 
+              />
             </div>
           ) : (
             <p>No image found.</p>
@@ -141,6 +146,7 @@ function ImageGalleryContent() {
                     key={image.src}
                     src={image.src}
                     alt={image.alt}
+                    loading="lazy"
                     className={`h-40 w-full rounded-md object-cover ${config.cardBackground}`}
                   />
                 ))}

@@ -2,6 +2,9 @@
 import '@testing-library/jest-dom';
 import 'whatwg-fetch'
 
+// Force development environment for React testing
+process.env.NODE_ENV = 'development';
+
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
