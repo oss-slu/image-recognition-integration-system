@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { AppConfig } from "@/types/config";
+import Spinner from "./spinner";
 import { optimizeImage, logCompression } from "../utils/imageOptimization";
 
 
@@ -74,7 +75,9 @@ const CameraButton = () => {
     // Converting buffer to Base64
     const bufferToBase64 = (buffer: Buffer): Promise<string> => {
         return new Promise((resolve) => {
-            const blob = new Blob([buffer], { type: "image/webp" });
+                // Using ArrayBuffer.from() to ensure type compatibility
+                const data = Uint8Array.from(buffer);
+                const blob = new Blob([data.buffer], { type: "image/webp" });
             const reader = new FileReader();
             reader.readAsDataURL(blob);
             reader.onloadend = () => {
@@ -122,14 +125,17 @@ const CameraButton = () => {
     };
 
     return (
-        <button
-            className={`px-4 py-2 ${config?.cameraButtonColor} rounded-lg text-white shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2`}
-            onClick={takePhoto}
-            disabled={isCapturing}
-            aria-label={isCapturing ? "Capturing..." : "Use Camera"}
-        >
-            {isCapturing ? "Capturing..." : "Use Camera"}
-        </button>
+        <div className="relative">
+            <button
+                className={`px-4 py-2 ${config?.cameraButtonColor} rounded-lg text-white shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2`}
+                onClick={takePhoto}
+                disabled={isCapturing}
+                aria-label={isCapturing ? "Capturing..." : "Use Camera"}
+            >
+                {isCapturing ? "Capturing..." : "Use Camera"}
+            </button>
+            {isCapturing && <Spinner />}
+        </div>
     );
 };
 
