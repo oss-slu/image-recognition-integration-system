@@ -22,6 +22,13 @@ function ImageGalleryContent() {
   const [isSearching, setIsSearching] = useState(false);
   const [imageData, setImageData] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [apiUnavailable, setApiUnavailable] = useState(false); // State to track API failure
+
+  // Mock Fallback images
+  const mockImages: SimilarImage[] = Array.from({ length: 8 }).map((_, i) => ({
+    src: `https://picsum.photos/200/300?random=${i + 1}`,
+    alt: `Demo Image ${i + 1}`,
+  }));
 
   // Loading app config
   useEffect(() => {
@@ -33,7 +40,7 @@ function ImageGalleryContent() {
       });
   }, []);
 
-  // Retrieving image and trigger seard
+  // Retrieving image and trigger search
   const retrieveImageAndSearch = async (id: string, config: AppConfig) => {
     try {
       const base64 = await getImageFromIndexedDB(id);
@@ -60,6 +67,7 @@ function ImageGalleryContent() {
   const sendPhotoToAPI = async (base64Image: string, config: AppConfig) => {
     setIsSearching(true);
     setSimilarImages([]);
+    setApiUnavailable(false); // Resetting before each attempt
 
     try {
       const { data } = await axios.post(
@@ -70,6 +78,7 @@ function ImageGalleryContent() {
             'Content-Type': 'application/json',
             Accept: 'application/json',
           },
+          timeout: 10000, // 10-second timeout to prevent hanging
           withCredentials: false,
         }
       );
@@ -86,7 +95,20 @@ function ImageGalleryContent() {
       }
     } catch (error) {
       console.error('API request failed:', error);
-      setSimilarImages([]);
+
+      // Detect network issues and use fallback mock images
+      if (
+        error.code === 'ECONNREFUSED' ||
+        error.code === 'ENOTFOUND' ||
+        error.code === 'ECONNABORTED' ||
+        error.message?.includes('timeout') ||
+        error.message?.includes('Network Error')
+      ) {
+        setApiUnavailable(true);
+        setSimilarImages(mockImages);
+      } else {
+        setSimilarImages([]);
+      }
     } finally {
       setIsSearching(false);
     }
@@ -112,6 +134,13 @@ function ImageGalleryContent() {
 
       <main>
         <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+          {/* Warning banner for fallback mode */}
+          {apiUnavailable && (
+              <div className="mb-4 rounded-md border border-yellow-400 bg-yellow-100 px-4 py-2 text-yellow-800">
+                The similarity API is unavailable. Showing demo images instead.
+            </div>
+          )}
+
           <h2 className={`mb-2 ml-4 text-xl font-semibold ${config.headingColor}`}>Queried image</h2>
           {loading ? (
             <p>Loading input image...</p>
@@ -136,9 +165,9 @@ function ImageGalleryContent() {
           )}
 
           {similarImages.length > 0 && (
-            <div>
+            <div className="mt-6">
               <h2 className={`mb-4 ml-4 text-xl font-semibold ${config.headingColor}`}>
-                Similar Images
+                {apiUnavailable ? 'Demo Images' : 'Similar Images'} {/* Label changes in fallback */}
               </h2>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                 {similarImages.map((image) => (
