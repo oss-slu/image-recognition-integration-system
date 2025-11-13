@@ -32,7 +32,7 @@ function ImageGalleryContent() {
 
   // Loading app config
   useEffect(() => {
-    fetch('./setup.json')
+    fetch('/setup.json')
       .then((response) => response.json())
       .then((data) => setConfig(data))
       .catch((error) => {

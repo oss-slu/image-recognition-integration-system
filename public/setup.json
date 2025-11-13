@@ -1,0 +1,8 @@
+{
+  "imageApiUrl": "http://localhost:5000/similarity",
+  "appBackground": "bg-gray-900",
+  "textColor": "text-white",
+  "headingColor": "text-blue-400",
+  "cardBackground": "bg-gray-800",
+  "borderColor": "border-gray-700"
+}
