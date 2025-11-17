@@ -89,7 +89,7 @@ const LoginScreen = () => {
             {/* Bottom Decoration */}
             <div 
                 data-testid="bottom-decor"
-                className="absolute bottom-0 left-0 size-24 translate-y-1/2 rotate-[-20deg] rounded-tr-xl bg-secondary sm:w-32 md:w-40"
+                className="absolute bottom-0 left-0 size-24 translate-y-1/2 rotate-[-20deg] rounded-tr-xl bg-secondary sm:size-32 md:size-40"
             />
         </div>
     );

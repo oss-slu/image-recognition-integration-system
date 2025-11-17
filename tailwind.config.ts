@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import plugin from 'tailwindcss/plugin';
 
 const config: Config = {
   content: [
@@ -39,6 +40,19 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Add a 'size-{key}' shorthand that sets both width and height from the theme spacing scale.
+    plugin(function ({ matchUtilities, theme }) {
+      matchUtilities(
+        {
+          size: (value: string) => ({
+            width: value,
+            height: value,
+          }),
+        },
+        { values: theme('spacing') }
+      );
+    }),
+  ],
 };
 export default config;
