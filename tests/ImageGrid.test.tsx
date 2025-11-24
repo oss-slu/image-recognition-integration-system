@@ -7,8 +7,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { axe, toHaveNoViolations } from 'jest-axe';
 
-import ImageGrid from '../components/ImageGrid';
-import { ImageGridProps } from '../components/ImageGrid.types';
+import ImageGrid from '../app/components/imageGrid';
+import { ImageGridProps } from '../app/components/imageGrid';
 
 expect.extend(toHaveNoViolations);
 

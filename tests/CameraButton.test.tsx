@@ -1,12 +1,8 @@
 /** @jest-environment jsdom */
-// tests/CameraButton.test.tsx
-// Simple test for CameraButton - keeping it readable with small comments
-
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-// Adjusting import path based on the folder setup
 import CameraButton from "../app/components/cameraButton";
 
 // Shared spy so the component and the test see the same push()
@@ -18,107 +14,18 @@ jest.mock("next/navigation", () => ({
 // Mock uuid so we know the imageId used in push()
 jest.mock("uuid", () => ({ v4: () => "test-uuid-123" }));
 
-// Mock Capacitor camera call
-jest.mock("@capacitor/camera", () => ({
-  Camera: {
-    getPhoto: jest.fn(async () => ({
-      webPath: "https://example.com/photo.jpg",
-    })),
-  },
-  CameraResultType: { Uri: "uri" },
+// Mock the hook we refactored to
+jest.mock("../app/hooks/useCameraCapture", () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
-
-// Mock image optimization functions
-jest.mock("../app/utils/imageOptimization", () => ({
-  optimizeImage: jest.fn(async (buffer: Buffer) => buffer), // Return buffer as-is for tests
-  logCompression: jest.fn(),
-}));
-
-// Mock Buffer for jsdom environment
-global.Buffer = Buffer;
-
-// Mock console.log to see what's happening
-const originalConsoleLog = console.log;
-console.log = (...args) => {
-  if (
-    args[0]?.includes?.("Photo captured") ||
-    args[0]?.includes?.("Generating image ID")
-  ) {
-    originalConsoleLog(...args);
-  }
-};
-
-// Tiny FileReader stub -> turns a blob into a base64 string
-class FileReaderMock {
-  result: string | ArrayBuffer | null = null;
-  onloadend: null | (() => void) = null;
-  readAsDataURL(_blob: Blob) {
-    this.result = "data:image/png;base64,AAA";
-    // Fire on the next tick so onloadened can be assigned first
-    setTimeout(() => {
-      if (this.onloadend) this.onloadend();
-    }, 0);
-  }
-}
-Object.defineProperty(window, "FileReader", { value: FileReaderMock });
-
-// Super small IndexedDB mock (just enough for .open -> transaction -> put)
-const fakeTx = {
-  objectStore: () => ({ put: (_v: any) => void 0 }),
-  oncomplete: null as null | (() => void),
-  onerror: null as null | (() => void),
-};
-const fakeDb = {
-  transaction: () => fakeTx,
-  objectStoreNames: { contains: () => false },
-  createObjectStore: (_: string, __: any) => void 0,
-};
-function makeIDBOpenSuccess() {
-  const req: any = {};
-  queueMicrotask(() => {
-    // Mock DB returned on success
-    const db = {
-      // Creating a tx that calls oncomplete AFTER the handler is set
-      transaction: (_store: string, _mode: string) => {
-        const tx: any = {};
-        tx.objectStore = () => ({ put: (_v: any) => void 0 });
-
-        // Fire after the current synchronous code completes
-        queueMicrotask(() => {
-          if (typeof tx.oncomplete === "function") tx.oncomplete();
-        });
-
-        return tx;
-      },
-      objectStoreNames: { contains: () => true },
-      createObjectStore: (_: string, __: any) => void 0,
-    };
-
-    // If code listens for upgrade, calling it first
-    if (typeof req.onupgradeneeded === "function") {
-      req.result = db;
-      req.onupgradeneeded({} as any);
-    }
-
-    // Then signal success with the deb
-    req.result = db;
-    if (typeof req.onsuccess === "function") {
-      req.onsuccess(new Event("success"));
-    }
-  });
-  return req;
-}
-(window as any).indexedDB = {
-  open: jest.fn((_name: string, _ver: number) => makeIDBOpenSuccess()),
-};
+import useCameraCapture from "../app/hooks/useCameraCapture";
 
 // Silence console.error in this suit
 const muteErr = jest.spyOn(console, "error").mockImplementation(() => {});
 afterAll(() => muteErr.mockRestore());
 
-// Fetching is used twice in the component:
-// 1. ./setup.json -> returns color class
-// 2. photo.webPath -> returns a Blob
+// Fetch used for setup.json only in the component
 const fetchMock = jest.fn(async (url: string) => {
   if (url.includes("setup.json")) {
     return {
@@ -126,88 +33,89 @@ const fetchMock = jest.fn(async (url: string) => {
       json: async () => ({ cameraButtonColor: "bg-green-600" }),
     } as any;
   }
-  // Create a mock blob with arrayBuffer method
-  const mockBlob = new Blob(["x"], { type: "image/png" });
-  mockBlob.arrayBuffer = jest.fn().mockResolvedValue(new ArrayBuffer(8));
-  return {
-    ok: true,
-    blob: async () => mockBlob,
-  } as any;
+  return { ok: false } as any;
 });
 global.fetch = fetchMock as any;
 
 describe("CameraButton", () => {
   afterEach(() => jest.clearAllMocks());
 
-  // Renders + Aria
   test("renders the button with accessible name", () => {
+    (useCameraCapture as jest.Mock).mockReturnValue({
+      isCapturing: false,
+      takePhoto: jest.fn().mockResolvedValue(null),
+    });
+
     render(<CameraButton />);
     expect(
       screen.getByRole("button", { name: /use camera/i })
     ).toBeInTheDocument();
   });
 
-  // Theming from setup.json
   test("applies color class from setup.json", async () => {
+    (useCameraCapture as jest.Mock).mockReturnValue({
+      isCapturing: false,
+      takePhoto: jest.fn().mockResolvedValue(null),
+    });
+
     render(<CameraButton />);
+
     await waitFor(() => {
       const btn = screen.getByRole("button", {
-        name: /use camera|capturing\.\.\./i,
+        name: /use camera|capturing\.{3}/i,
       });
       expect(btn.className).toContain("bg-green-600");
     });
   });
 
-  // Clicking interaction + Full flow (capture -> store -> push)
   test("click starts capture and navigates with imageId", async () => {
     const user = userEvent.setup();
+    const takePhotoMock = jest.fn().mockResolvedValue("test-uuid-123");
+    (useCameraCapture as jest.Mock).mockReturnValue({
+      isCapturing: false,
+      takePhoto: takePhotoMock,
+    });
+
     render(<CameraButton />);
 
     await user.click(screen.getByRole("button", { name: /use camera/i }));
 
-    // Wait for capturing state to appear
     await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: /capturing\.\.\./i })
-      ).toBeDisabled();
-    });
-
-    await waitFor(() => {
+      expect(takePhotoMock).toHaveBeenCalledTimes(1);
       expect(push).toHaveBeenCalledWith("/imageGallery?imageId=test-uuid-123");
     });
-
-    // Back to normal
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: /use camera/i })
-      ).not.toBeDisabled();
-    });
   });
 
-  // Disabled state: no double clicks while capturing
   test("ignores extra clicks while capturing", async () => {
     const user = userEvent.setup();
+    const takePhotoMock = jest.fn().mockResolvedValue("test-uuid-123");
+    // Simulate hook reporting capturing=true so button is disabled
+    (useCameraCapture as jest.Mock).mockReturnValue({
+      isCapturing: true,
+      takePhoto: takePhotoMock,
+    });
+
     render(<CameraButton />);
-    const first = screen.getByRole("button", { name: /use camera/i });
+    const first = screen.getByRole("button", { name: /capturing\.{3}/i });
     await user.dblClick(first); // Double click fast
-    // Still should only navigate once
-    await waitFor(() => expect(push).toHaveBeenCalledTimes(1));
+    // Should not call takePhoto while capturing
+    await waitFor(() => expect(takePhotoMock).toHaveBeenCalledTimes(0));
   });
 
-  // Guard: If camera returns no webPath, it should not crash
-  test("handles missing webPath", async () => {
-    const { Camera } = await import("@capacitor/camera");
-    (Camera.getPhoto as any).mockResolvedValueOnce({ webPath: null });
-
+  test("handles missing webPath (takePhoto returns null)", async () => {
     const user = userEvent.setup();
+    const takePhotoMock = jest.fn().mockResolvedValue(null);
+    (useCameraCapture as jest.Mock).mockReturnValue({
+      isCapturing: false,
+      takePhoto: takePhotoMock,
+    });
+
     render(<CameraButton />);
 
     await user.click(screen.getByRole("button", { name: /use camera/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: /use camera/i })
-      ).not.toBeDisabled();
+      expect(push).not.toHaveBeenCalled();
     });
   });
 });
