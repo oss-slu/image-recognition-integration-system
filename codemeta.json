@@ -1,0 +1,19 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+
+  "name": "Image Recognition Integration System (IRIS)",
+  "version": "0.1.0",
+
+  "description": "A framework for building AI-powered image search applications across web and mobile platforms",
+
+  "codeRepository": "https://github.com/oss-slu/image-recognition-integration-system",
+  "issueTracker": "https://github.com/oss-slu/image-recognition-integration-system/issues",
+
+  "author": [
+    {
+      "@type": "Organization",
+      "name": "IRIS Contributors"
+    }
+  ]
+}
