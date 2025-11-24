@@ -1,0 +1,13 @@
+# CITATION.cff
+# Basic citation file added as part of FAIR compliance
+
+cff-version: 1.2.0
+title: "Image Recognition and Inspection System (IRIS)"
+
+message: "If you use IRIS in your work, please cite it using the information below"
+
+authors:
+  - name: "IRIS Contributors"
+
+version: "0.1.0"
+respository-code: "https://github.com/oss-slu/image-recognition-integration-system"
