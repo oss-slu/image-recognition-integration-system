@@ -32,7 +32,7 @@ export const getImageBlob = (imageId: string): Promise<Blob | null> => {
       const db = request.result;
       const transaction = db.transaction("images", "readonly");
       const store = transaction.objectStore("images");
-      const getReq = store.get(imageId as any);
+      const getReq = store.get(imageId as string);
 
       getReq.onsuccess = () => {
         const res = getReq.result;
