@@ -27,13 +27,6 @@ function ImageGalleryContent() {
   const [isSearching, setIsSearching] = useState(false);
   const [imageData, setImageData] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [apiUnavailable, setApiUnavailable] = useState(false); // State to track API failure
-
-  // Mock Fallback images
-  const mockImages: SimilarImage[] = Array.from({ length: 8 }).map((_, i) => ({
-    src: `https://picsum.photos/200/300?random=${i + 1}`,
-    alt: `Demo Image ${i + 1}`,
-  }));
 
   // Loading app config
   useEffect(() => {

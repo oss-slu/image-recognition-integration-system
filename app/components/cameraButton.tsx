@@ -1,16 +1,17 @@
 "use client";
 
-import { Camera, CameraResultType } from "@capacitor/camera";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { AppConfig } from "@/types/config";
+import useCameraCapture from "../hooks/useCameraCapture";
+import Spinner from "./spinner";
 import { optimizeImage, logCompression } from "../utils/imageOptimization";
 
 const CameraButton = () => {
   const router = useRouter();
-  const [isCapturing, setIsCapturing] = useState(false);
   const [config, setConfig] = useState<AppConfig | null>(null);
+  const { isCapturing, takePhoto: capturePhoto } = useCameraCapture();
 
   useEffect(() => {
     fetch(`./setup.json`)
@@ -23,16 +24,10 @@ const CameraButton = () => {
       });
   }, []);
 
-  const takePhoto = async () => {
+  const handleClick = async () => {
     try {
-      setIsCapturing(true);
-      const photo = await Camera.getPhoto({
-        quality: 100,
-        resultType: CameraResultType.Uri,
-        allowEditing: false,
-      });
-
-      if (!photo.webPath) {
+      const photo = await capturePhoto();
+      if (!photo?.webPath) {
         throw new Error("Photo capture failed");
       }
 
@@ -64,8 +59,6 @@ const CameraButton = () => {
       router.push(`/imageGallery?imageId=${imageId}`);
     } catch (error) {
       console.error("Camera error:", error);
-    } finally {
-      setIsCapturing(false);
     }
   };
 
@@ -120,13 +113,17 @@ const CameraButton = () => {
   };
 
   return (
-    <button
-      className={`px-4 py-2 ${config?.cameraButtonColor} rounded-lg text-white shadow-md`}
-      onClick={takePhoto}
-      disabled={isCapturing}
-    >
-      {isCapturing ? "Capturing..." : "Use Camera"}
-    </button>
+    <div className="relative">
+      <button
+        className={`px-4 py-2 ${config?.cameraButtonColor} rounded-lg text-white shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2`}
+        onClick={handleClick}
+        disabled={isCapturing}
+        aria-label={isCapturing ? "Capturing..." : "Use Camera"}
+      >
+        {isCapturing ? "Capturing..." : "Use Camera"}
+      </button>
+      {isCapturing && <Spinner />}
+    </div>
   );
 };
 

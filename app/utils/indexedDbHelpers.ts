@@ -1,3 +1,51 @@
+export const storeImageBlob = (imageId: string, blob: Blob) => {
+  return new Promise<void>((resolve, reject) => {
+    const request = indexedDB.open("ImageStorageDB", 1);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains("images")) {
+        db.createObjectStore("images", { keyPath: "id" });
+      }
+    };
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction("images", "readwrite");
+      const store = transaction.objectStore("images");
+
+      store.put({ id: imageId, data: blob, timestamp: new Date().toISOString() });
+
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = (ev) => reject(ev);
+    };
+
+    request.onerror = (ev) => reject(ev);
+  });
+};
+
+export const getImageBlob = (imageId: string): Promise<Blob | null> => {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("ImageStorageDB", 1);
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction("images", "readonly");
+      const store = transaction.objectStore("images");
+      const getReq = store.get(imageId as string);
+
+      getReq.onsuccess = () => {
+        const res = getReq.result;
+        if (!res) return resolve(null);
+        resolve(res.data as Blob);
+      };
+
+      getReq.onerror = (ev) => reject(ev);
+    };
+
+    request.onerror = (ev) => reject(ev);
+  });
+};
 // This file contains helper functions for IndexedDB operations
 // We are opening a database, reading a list of saved images and returning them as a promise
 
