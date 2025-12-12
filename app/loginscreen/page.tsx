@@ -1,91 +1,107 @@
-"use client";
-import React, { useState, FormEvent } from 'react';
+'use client';
 
-const LoginScreen = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../contexts/AuthContext';
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        alert("submitted.");
-        console.log('Email:', email);
-        console.log('Password:', password);
-    };
+export default function LoginScreen() {
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const { login, register } = useAuth();
+  const router = useRouter();
 
-    return (
-        <div 
-            data-testid="login-container"
-            className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-white px-4 sm:px-8 md:px-16 lg:px-32"
-        >
-            {/* Top Circle */}
-            <div 
-                data-testid="top-circle"
-                className="absolute right-0 top-0 size-40 -translate-y-1/2 translate-x-1/2 rounded-full bg-primary sm:size-48 md:size-64"
-            />
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-            {/* Card */}
-            <div data-testid="login-card" className="z-10 w-full sm:max-w-md">
-                <h1 className="mb-2 text-4xl font-bold">Irls</h1>
-                <h2 className="mb-8 text-xl font-semibold">Login</h2>
+    try {
+      if (isLogin) {
+        await login(email, password);
+      } else {
+        await register(email, password, username);
+      }
+      router.push('/');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label className="mb-2 block text-lg">Email</label>
-                        <input
-                            data-testid="email-input"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full border-b border-black py-2 text-base focus:outline-none"
-                            placeholder="Enter your email"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="mb-2 block text-lg">Password</label>
-                        <input
-                            data-testid="password-input"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full border-b border-black py-2 text-base focus:outline-none"
-                            placeholder="Enter your password"
-                            required
-                        />
-                    </div>
-                    <div 
-                        data-testid="forgot-password-text"
-                        className="text-right text-sm text-gray-700"
-                    >
-                        Forgot Password?
-                    </div>
-                    <button
-                        data-testid="sign-in-button"
-                        type="submit"
-                        className="mt-4 w-full rounded-2xl bg-primary py-3 text-lg text-white"
-                    >
-                        Sign In
-                    </button>
-                </form>
-
-                <div className="mt-8 text-center text-sm">
-                    Don&apos;t have an account?{' '}
-                    <span 
-                        data-testid="signup-text"
-                        className="cursor-pointer font-semibold text-blue-700"
-                    >
-                        Sign Up
-                    </span>
-                </div>
-            </div>
-
-            {/* Bottom Decoration */}
-            <div 
-                data-testid="bottom-decor"
-                className="absolute bottom-0 left-0 size-24 translate-y-1/2 rotate-[-20deg] rounded-tr-xl bg-secondary sm:size-32 md:size-40"
-            />
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            {isLogin ? 'Sign in to your account' : 'Create new account'}
+          </h2>
         </div>
-    );
-};
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+          
+          <div className="rounded-md shadow-sm -space-y-px">
+            {!isLogin && (
+              <input
+                type="text"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            )}
+            <input
+              type="email"
+              required
+              className={`appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 ${!isLogin ? '' : 'rounded-t-md'} focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              type="password"
+              required
+              className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-export default LoginScreen;
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              {loading ? 'Processing...' : (isLogin ? 'Sign in' : 'Sign up')}
+            </button>
+          </div>
+
+          <div className="text-center">
+            <button
+              type="button"
+              className="text-blue-600 hover:text-blue-500"
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError('');
+              }}
+            >
+              {isLogin ? 'Need an account? Sign up' : 'Already have an account? Sign in'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

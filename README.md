@@ -44,7 +44,6 @@ The Image Recognition Integration System (IRIS) was created to streamline the de
    git clone https://github.com/oss-slu/image-recognition-integration-system.git
    cd image-recognition-integration-system
    ```
-
 2. **Install dependencies**:
 
    ```sh
@@ -52,7 +51,6 @@ The Image Recognition Integration System (IRIS) was created to streamline the de
    # or
    yarn install
    ```
-
 3. **Run in development**:
 
    ```sh
@@ -60,7 +58,6 @@ The Image Recognition Integration System (IRIS) was created to streamline the de
    # or
    yarn dev
    ```
-
 4. **Build & Export for production**:
 
    ```sh
@@ -79,23 +76,19 @@ To deploy IRIS as a native app on iOS or Android, follow these steps:
    ```sh
    npm install @capacitor/core @capacitor/cli --save
    ```
-
 2. **Initialize Capacitor** (one-time, if not done):
 
    ```sh
    npx cap init
    # Use com.iris.app for App ID and "image-recognition-integration-system" for App Name
    ```
-
 3. **Add Platforms**:
 
    ```sh
    npx cap add ios
    npx cap add android
    ```
-
 4. **Configure**: The file `capacitor.config.ts` sets your `appId`, `appName`, and `webDir`. By default, `webDir` is `out` (the export directory).
-
 5. **Build & Sync**:
 
    ```sh
@@ -103,7 +96,6 @@ To deploy IRIS as a native app on iOS or Android, follow these steps:
    npm run export
    npx cap copy
    ```
-
 6. **Open & Run**:
 
    ```sh
@@ -121,8 +113,9 @@ IRIS now uses environment-based configuration instead of a public JSON file
 ### Environment Variables
 
 Create a `.env.local` file in the project root with:
+
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:5050
+NEXT_PUBLIC_API_URL=http://localhost:5001
 API_SECRET_KEY=7b5ef4e74ed218a9d77ca03a3f74e86d
 ALLOWED_ORIGIN=http://localhost:3000
 ```
